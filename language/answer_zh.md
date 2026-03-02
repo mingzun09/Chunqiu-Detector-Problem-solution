@@ -98,10 +98,7 @@ avb版本异常，通常是被模块修改所致，可自行排查
 侧信道检测，更新根管理器
 APatch请使用Nohello.kpm模块隐藏
 
-## AbnormalEnvironment(04)/(01)
-## Detected anomalous file
-## Miscellaneous(a)
-## Cavert test(a)
+## AbnormalEnvironment(04)/(01)/Detected anomalous file/Miscellaneous(a)/Cavert test(a)
 （dev和/data/local/tmp目录下的文件检查，重命名/删除相关目录）建议格式化系统或者线刷
 自行排查异常文件（你对设备做了什么事情，你应该记得在哪里）
 也可以排除并删除以下路径的文件/文件夹：
