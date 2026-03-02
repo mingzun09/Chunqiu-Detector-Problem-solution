@@ -1,5 +1,6 @@
 ## 第三版整理的检测项解答
-仅供参考，具体结果因人而异
+### 内容跟随最新版本检测而删改
+### 仅供参考，具体结果因人而异
 by mingzun09(SuXiaoMing)
 
 ## 异常进程组
@@ -9,9 +10,9 @@ by mingzun09(SuXiaoMing)
 更新LSP it
 
 ## Evil Service
-与zygisk next关系
+与zygisk next有关
 如果使用的是ksu（sukisu ksunext等分支）则在zygisk里打开仅还原挂载模式
-如果是magisk（alpha和Kitsune）则在zygisk next中开启强制模式
+如果是magisk（alpha和Kitsune）则在zygisk next中开启强制模式/仅还原挂载模式（部分设备仍然不行）
 
 ## Found Injection (a)
 大多数都和调度有关系，满血核心模块会导致这个问题
@@ -28,17 +29,19 @@ by mingzun09(SuXiaoMing)
 会导致这个问题，可以等此模块更新解决
 或者更新系统至Android安全更新2025-09-01（各oem合入修复并发版日期不同）
 
-##futile hode（tmp异常） 
+## futile hode（tmp异常） 
 目录/data/local/tmp/被修改过
 自行尝试恢复（使用susfs或者格式化）
 !不推荐
 也可以删除tmp文件夹在/data/local/目录下随便选一个文件夹把名称改为tmp
 
-## 实验性检测2(概率误报测试中) 
-此检测项已被删除
-
 ## 虚拟机环境
 （特别改机型模块或者prop被修改，关掉模块或还原prop）
+改机型模块导致的？
+
+## 环境异常a
+与牛头Abnormal Environment一样
+APatch请尝试使用kpm模块解决比如Nohello.kpm
 
 ## 发现隐藏的UID
 （/sys/fs/cgroup/找到的UID,sus挂载隐藏，或者自行排查）
@@ -48,11 +51,12 @@ by mingzun09(SuXiaoMing)
 卸载风险应用/使用susfs隐藏/使用HMA-OSS隐藏/自行尝试隐藏
 
 ## Tampered Attestation(a)/(b)
-(a)为密钥发生替换，清除春秋全部数据可消失或变其他词条；
+(a)为密钥发生替换，清除春秋全部数据可解决
 (b)*为不稳定测试，无需处理
 
 ## bl状态异常 
-刷入Tricky Store并添加包名
+刷入Tricky Store模块
+并在/data/adb/tricky_store/target.txt中添加检测器包名
 
 ## MT2/异常文件
 根目录下有“mt2”文件夹，在Mt管理器设置中修改默认路径名称并删除旧的mt2文件夹
@@ -64,7 +68,8 @@ by mingzun09(SuXiaoMing)
 resetprop persist.hyperceiler.log.level ""
 resetprop --delete persist.hyperceiler.log.level
 
-## Suspicious Surroundings(a/b/c)（/data/local/tmp路径
+## Suspicious Surroundings(a/b/c)
+/data/local/tmp路径
 (a)：tmp文件夹设为root用户和所有组，改为shell
 (b)：tmp的inode值高于10000，可以参考检测项7解决
 (c)：tmp权限不为771，设置为771）
@@ -73,10 +78,12 @@ resetprop --delete persist.hyperceiler.log.level
 更新zygisk next模块及LSP模块
 
 ## Miscellaneous Check (13)
-使用susfs模块
+使用susfs模块解决
+此检测项通常与其他问题同时出现
 
 ## ro.boot.vbmeta.avb_version=报错的值
-（部分模块导致，可自行排查）
+avb版本异常，通常是被模块修改所致，可自行排查
+或隐藏此属性
 
 ## 伪装内核版本和第三方内核
 （使用susfs伪装时勾选post-data，用原厂内核构建信息）
@@ -89,16 +96,15 @@ resetprop --delete persist.hyperceiler.log.level
 
 ## Abnormal Environment 
 侧信道检测，更新根管理器
+APatch请使用Nohello.kpm模块隐藏
 
-## AbnormalEnvironment(04)/(01)、Detected anomalous file(Miscellaneous(a))、Cavert test(a)
+## AbnormalEnvironment(04)/(01)
+## Detected anomalous file
+## Miscellaneous(a)
+## Cavert test(a)
 （dev和/data/local/tmp目录下的文件检查，重命名/删除相关目录）建议格式化系统或者线刷
-
-## 发现GG修改器运行痕迹
-（删除/storage/emulated/0/legacy文件夹）
-
-## Abnormal Environment(01)
 自行排查异常文件（你对设备做了什么事情，你应该记得在哪里）
-解决方案：删除以下路径的文件/文件夹：
+也可以排除并删除以下路径的文件/文件夹：
 /data/local/stryker
 /data/system/AppRetention
 /data/local/tmp/luckys
@@ -124,8 +130,12 @@ resetprop --delete persist.hyperceiler.log.level
 /data/swap_config.conf
 /data/local/tmp/resetprop
 
-## found## scene(1,2,3,4）
+## 发现GG修改器运行痕迹
+删除/storage/emulated/0/legacy文件夹
+
+## found## scene(1/2/3/4）
 不使用scene或者无视
+此检测项在新版中已更名
 
 ## 风险应用[检测数量]
 （随机包名或者使用HMA，路径暴露需sus路径隐藏）
@@ -134,67 +144,72 @@ resetprop --delete persist.hyperceiler.log.level
 （更换有效keybox）
 
 ## tee损坏
-使用Tricky Store模块解决
+刷入Tricky Store模块
+并在/data/adb/tricky_store/target.txt中添加检测器包名
 
 ## Found bl hide
-（发现隐藏BL列表，自行排查）
+发现隐藏BL列表，自行排查
 
 ## ADB[running] 
-USB调试已开启（开发者选项关闭，一加无需处理）
+USB调试已开启
+开发者选项中关闭USB调试
 
 ## Found Su
-发现了Su，除非susfs出现bug或者Magsik没做隐藏就不会出现（也可能某人傻到对检测软件授权su）
+发现了Su
+除非susfs出现bug或者Magsik没做隐藏就不会出现
+（也可能某人傻到对检测软件授权su）
 
 ## Found XP
-（检测到文件或类似HyperCeiler模块，清除/data/local/tmp/下所有文件或卸载该模块）
+检测到文件或类似HyperCeiler模块
+清除/data/local/tmp/下所有文件或卸载该模块
 
 ## 不合法的哈希值
-用密钥验证/Native Detector获取Boot哈希值，创建sh脚本，root执行resetprop ro## boot## vbmeta## digest 自身哈希值
+用密钥验证/Native Detector获取Boot哈希值
+创建sh脚本，root执行resetprop ro.boot.vbmeta.digest 自身哈希值
 或者使用Tricky Store搭配TS插件并配置哈希值
 
 ## Covert test (10)
-（外部存储存在sh脚本，删除或者整理后放无法读取目录下）
+外部存储存在sh脚本，删除或者整理后放无法读取目录下
 
 ## 春秋已被隐藏应用列表隐藏/试图隐藏应用
 字面意思
 
 ## 发现外挂文件
-（按提示删除）
+按提示删除
 
 ## hide hook
-（检测到被hook，打开lsp取消对春秋检测的模块作用域勾选）
+检测到被hook，打开lsp取消对春秋检测的模块作用域勾选
 
 ## found evil version
-（无障碍列表关闭scene启用并重启手机）
+无障碍列表关闭scene启用并重启手机
 
 ## Abnormal Environment（n）
-（按提示目录删除）
+按提示目录删除
 
 ## 第三方rom(01)
-（无视或者换回官方rom也可自行尝试解决）
+无视或者换回官方rom也可自行尝试解决
 
 ## play lntegrity fix
-更换play lntegrity fix模块或者卸载
+更换play lntegrity fix模块或者卸载模块
 
 ## 发现异常修改
 未知，或许软件包被篡改？
 
 ## Found Rekernel Module
 发现ReKernel，更新Rekernel
+或者卸载Rekernel(如果可以）
 
 ## Conventiona Tests(a/b)
-（未知）
+未知
 
 ## 密钥篡改！！！
 检测到烧录tee等行为
+Tricky Store模块的包名文件中对检测器包名添加了！符号导致的
+删除符号或改成？符号
 
 ## 发现可疑挂载
 （未用模块隐藏挂载导致）
 使用susfs或者zygisk next开启仅还原挂载
-
-## Found Scene＞＞/dev/cpuset/scene-daemon
-发现scene daemon
-卸载scene或者无视
 
 ## BL已解锁
 设备已解锁，用Tricky Store隐藏
@@ -205,15 +220,9 @@ USB调试已开启（开发者选项关闭，一加无需处理）
 ## Found LSPHook Framework
 （某些xposed模块导致，可以通过排除法提供）
 
-## Abnormal Environment
-（存在## sh或隐藏应用列表配置等风险文件）
-
 ## 密钥吊销
 （keybox被吊销）
 更换keybox
-
-## 密钥基础校验未通过
-使用Tricky Store勾选包名
 
 ## 试图隐藏路径
 使用sus隐藏某路径导致，但使用方法不对导致被检测
@@ -221,17 +230,14 @@ USB调试已开启（开发者选项关闭，一加无需处理）
 ## Abnormal Environment(09)
 未知
 
-## 获取失败的KeyAttestation 
-用Tricky Store强制模式（对包名前面加“!”符号）
-
 ## Tampered Kernel
-系统内核信息被篡改，还原未修改的boot## img或者尝试使用susfs隐藏
+系统内核信息被篡改，还原未修改的boot.mg或者尝试使用susfs隐藏
 
 ## 发现外挂驱动
 发现刷入了外挂驱动
 
 ## BL已解锁或密钥异常
-在/data/adb/Tricky_Store/target## txt添加春秋包名+英文感叹号!
+在/data/adb/Tricky_Store/target.xt添加春秋包名+英文感叹号!
 
 ## 异常的system挂载 路径
 （未知模块或其他因素产生的挂载）
