@@ -1,17 +1,19 @@
-# Spring Detection Solutions (Follows Latest Version)
-> Organized by: mingzun09(SuXiaoMing) | For reference only, specific results may vary by device/environment
+Spring Detection Solutions (Follows Latest Version)
 
-## Table of Contents
-- [Process.Service.Anomalies](#Process.Service.Anomalies)
-- [File/Directory Permission/Path Anomalies]
-- [System Property/Kernel/Key Anomalies]
-- [Module/Tool Residue Anomalies]
-- [Environment/Mount/Hiding Anomalies]
-- [Other Miscellaneous Checks]
+Organized by: mingzun09(SuXiaoMing) | For reference only, specific results may vary by device/environment
+
+Table of Contents
+
+· Process/Service Anomalies
+· File/Directory Permission/Path Anomalies
+· System Property/Kernel/Key Anomalies
+· Module/Tool Residue Anomalies
+· Environment/Mount/Hiding Anomalies
+· Other Miscellaneous Checks
 
 ---
 
-##Process.Service.Anomalies
+Process/Service Anomalies
 
 01. Abnormal Process Group
 
