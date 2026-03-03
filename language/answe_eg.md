@@ -1,15 +1,13 @@
-Spring Detection Solutions (Follows Latest Version)
+# Spring Detection Solutions (Follows Latest Version)
+> Organized by: mingzun09(SuXiaoMing) | For reference only, specific results may vary by device/environment
 
-Organized by: mingzun09(SuXiaoMing) | For reference only, specific results may vary by device/environment
-
-Table of Contents
-
-· Process/Service Anomalies
-· File/Directory Permission/Path Anomalies
-· System Property/Kernel/Key Anomalies
-· Module/Tool Residue Anomalies
-· Environment/Mount/Hiding Anomalies
-· Other Miscellaneous Checks
+## Table of Contents
+- [Process/Service Anomalies]
+- [File/Directory Permission/Path Anomalies]
+- [System Property/Kernel/Key Anomalies]
+- [Module/Tool Residue Anomalies]
+- [Environment/Mount/Hiding Anomalies]
+- [Other Miscellaneous Checks]
 
 ---
 
