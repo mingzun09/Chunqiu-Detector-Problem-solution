@@ -2,7 +2,7 @@
 > Organized by: mingzun09(SuXiaoMing) | For reference only, specific results may vary by device/environment
 
 ## Table of Contents
-- [Process.Service.Anomalies](Process.Service.Anomalies)
+- [Process.Service.Anomalies](#Process.Service.Anomalies)
 - [File/Directory Permission/Path Anomalies]
 - [System Property/Kernel/Key Anomalies]
 - [Module/Tool Residue Anomalies]
@@ -11,7 +11,7 @@
 
 ---
 
-Process.Service.Anomalies
+## Process.Service.Anomalies
 
 01. Abnormal Process Group
 
