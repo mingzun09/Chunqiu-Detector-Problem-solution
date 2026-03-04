@@ -1,5 +1,6 @@
-# 春秋检测项解决方案（跟进最新版本）
+# 春秋检测项解决方案（跟进最新版本）中文版
 > 整理：mingzun09(SuXiaoMing) | 仅供参考，具体结果因设备/环境而异
+> 文档链接：[text](https://github.com/mingzun09/Chunqiu-Detector-Problem-solution)
 
 ## SU binary detected
 > 检测到SU二进制文件（检测到ROOT）
