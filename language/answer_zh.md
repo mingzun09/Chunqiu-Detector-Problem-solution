@@ -83,7 +83,9 @@
 > 改机型模块导致?
 
 ## Miscellaneous Check(3)
-> 改机检测
+> 改机检测？
+> 开启过“隐藏应用列表(HMA)”的 Vold app
+data 隔离？
 
 ## 不一致的挂载/debug_ramdisk
 > umout /debug_ramdisk
