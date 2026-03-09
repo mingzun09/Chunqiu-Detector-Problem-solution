@@ -127,8 +127,8 @@
 > 检测Pty
 
 ## 环境伪造
-> 检测到假环境
-> 特征了某些拙劣的隐藏手段
+> 检测到AVC伪造？
+> 旧版本的ZN-AuditPatch模块/susfs(avc）会这样？
 
 ## ROOT进程
 > 检测Zygote环境?
