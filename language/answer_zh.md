@@ -129,7 +129,8 @@ data 隔离？
 > 检测Pty
 
 ## 环境伪造
-> 由“无影”提供的检测点，暂时未知原理
+> 此检测项在刷入ZN-Audit Patch模块后会触发。
+> 卸载ZN-Audit Patch模块
 
 ## ROOT进程
 > 检测Zygote环境?
