@@ -26,6 +26,10 @@
 > 检测到KSU/APatch/Magisk
 > 侧信道检测,更新你的管理器并重新修补
 
+## AbnormalEnvironment(04)
+> 新版更改为函数调用检测
+> 等待ROOT管理器/模块更新？
+
 ## KnelsU loop device
 > 检测到KSU
 > 更新你的管理器并重新修补
