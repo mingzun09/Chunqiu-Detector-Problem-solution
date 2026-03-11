@@ -47,11 +47,11 @@
 
 ## 检测到Scene端口占用
 > scene软件，你可以尝试隐藏
-> 无视此检测项，或者卸载scene
+> 无视此检测项，或者关闭scene的无障碍权限
 
 ## Zygisk detected
 > 检测到Zygisk,通常是magisk自带的zygisk导致（关闭解决）或者其他原因
-> 更新zygisk next模块
+> 更新[zygisk next模块](http://github.com/Dr-TSNG/ZygiskNext)
 
 ## Tmpered kernel
 > 内核信息校验异常(内核字符版本，内核构建时间)
@@ -81,6 +81,7 @@
 ## Miscellaneous Check(2)
 > 检测设备篡改
 > 改机型模块导致?
+> 联想设备会误报？
 
 ## Miscellaneous Check(3)
 > 改机检测？
@@ -145,15 +146,17 @@ data 隔离？
 ## 异常进程0000(pid）
 > 0000代表的是进程的pid
 > 你可以尝试使用scene来查找对应pid进程,通常是LSP进程
+> 也可以在系统设置中随便开一个软件分身尝试解决
 
 ## MT管理器(MT2文件夹)/异常文件
 > 异常文件：检测到.sh,.xml,.img,.json 等异常文件。
 > 通过MT管理器默认会对根目录下创建"mt2"文件夹特征
 > 可在MT管理器设置中对MT2路径自定义修改解决
 
-## Risk apps
-> 检测风险应用
-> 可尝试使用HMA-OSS对风险应用隐藏
+## Risk apps‘软件包名’
+> 检测风险应用>软件包名
+> 安装[Unicode零宽修复模块](https://t.me/real5ec1cff/268)对/storage/emulated/0/Android/data/目录修复可被读取问题
+> 也可尝试使用HMA-OSS对风险应用隐藏
 
 ## Thanox service detected
 > 检测Thanon服务
@@ -165,7 +168,7 @@ data 隔离？
 > 尝试使用Tricky Store模块解决
 
 ## 密钥证明未完成或链不一致
-> 更新Tricky Store模块?
+> 更新[Tricky Store模块?](https://github.com/5ec1cff/TrickyStore)
 
 ## AosP密钥
 > 更换keybox.xml
@@ -175,10 +178,10 @@ data 隔离？
 > 通常BL解锁后hash会变成0000,使用Tricky Store模块解决
 
 ## Bootloader unlock
-> BL已解锁,使用Tricky Store模块隐藏
+> BL已解锁,使用[Tricky Store模块隐藏](https://github.com/5ec1cff/TrickyStore)
 
 ## 启动状态异常
-> BL已解锁,使用Tricky Store模块隐藏
+> BL已解锁,使用[Tricky Store模块隐藏](https://github.com/5ec1cff/TrickyStore)
 
 ## 密钥篡改(128)
 > Tricky Store在一加高通设备上默认使用"密钥链生成模式"(强制模式)
@@ -189,19 +192,24 @@ data 隔离？
 
 ## 密钥篡改（b)
 > 未知
+## 证书已被吊销(CRL)
+> 更换keybox.xml
+
+## 密钥篡改
+> 更新[Tricky Store模块?](https://github.com/5ec1cff/TrickyStore)
 
 ## TrustedCert 证书篡改
 > 未知
 
 ## 发现Trickystore/类似模块
 > 等待模块更新
+> 也可更换[TEESimulator模块](https://github.com/JingMatrix/TEESimulator)
 
 ## Something wrong
 > 未知
 
 ## Miscellaneous Check(4/5/6/7)
-> 一些有关模拟器虚拟机的检测。
-> 还没有更新添加此检测项
+> 一些有关模拟器虚拟机/模拟器的检测。
 
 ## Miscellaneous Check(不一致挂载)
 > 通常是使用Magic mount元模块的触发?
