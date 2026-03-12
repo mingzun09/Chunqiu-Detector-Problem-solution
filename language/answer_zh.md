@@ -29,6 +29,7 @@
 ## AbnormalEnvironment(04)
 > 新版更改为函数调用检测
 > 等待ROOT管理器/模块更新？
+> APatch的排除修改对检测器开启后会出现此问题？
 
 ## KnelsU loop device
 > 检测到KSU
