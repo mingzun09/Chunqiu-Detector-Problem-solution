@@ -72,7 +72,7 @@
 ## Property Modified（数字代表几处属性修改）
 > 原理是查属性区空洞，如果说有存在空洞的话，说明存在属性修改。
 
-> 隐藏被修改的属性可将shamiko模块中的[service.sh](https://t.me/chunqiudetector/10259)文件添加并移动到/data/adb/service.d/目录下并重启，尝试解决。
+> 隐藏被修改的属性可将shamiko模块中的[shamiko.sh]([https://t.me/chunqiudetector/10259](https://github.com/mingzun09/Chunqiu-Detector-Problem-solution/blob/main/File/shamiko_Plus.sh))文件添加并移动到/data/adb/service.d/目录下并重启，尝试解决。
 
 ## 环境存疑1（实验性检测）
 > 在HMA-OSS中对检测器开启黑名单模式隐藏后，若勾选了设置预设中的“输入法”选项后，次检测项就会出现？
