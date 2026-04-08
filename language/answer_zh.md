@@ -52,7 +52,7 @@
 > 30   ：敏感设备标识类 attest 未被拒绝（如 SERIAL）
 
 ## Found property
-执行[此sh](https://t.me/chunqiudetector/14681)尝试解决
+执行[此sh]([https://t.me/chunqiudetector/14681](https://github.com/mingzun09/Chunqiu-Detector-Problem-solution/blob/main/File/Found%20property.sh))尝试解决
 
 
 ## 发现Trickystore/类似模块
