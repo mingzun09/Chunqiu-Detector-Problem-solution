@@ -85,6 +85,8 @@
 
 ## Found ksu/免解设备
 > 发现ksu处于越狱模式，当前设备使用ksu越狱模式的ROOT方式
+>
+> 也有可能是ksu进程未被隐藏
 
 ## SU binary detected
 > 检测到SU二进制文件（检测到ROOT）
