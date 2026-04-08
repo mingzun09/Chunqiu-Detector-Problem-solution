@@ -199,11 +199,9 @@
 > 格式化系统或者把tmp文件夹删除重启后变上方abc再使用sukisu中的Kstat配置（需要内核集成susfs）添加/data/local/tmp目录只修改ino值比如7365（tmp目录权限保持771，所有者为shell。
 
 ## Miscellaneous Check(2)
-> 检测设备篡改
+> 检测设备篡改/机型篡改
 > 
-> 改机型模块导致?
-> 
-> 联想/魅族/国外设备会误报？
+> 改机型模块导致?自行排查
 
 ## Miscellaneous Check(3)
 > 改机检测？
@@ -334,6 +332,7 @@ data 隔离？
 > BL已解锁,使用[TEESimulator-RS模块隐藏](https://github.com/Enginex0/TEESimulator-RS)
 需要配置/data/adb/tricky_store/目录下的target.txt文件，在其中添加软件包名（实时生效无需重启）
 也推荐使用[TS插件](https://github.com/KOWX712/Tricky-Addon-Update-Target-List/releases/tag/v5.0-beta.1)进行软件包名的可视化配置
+> 
 ## 启动状态异常
 > BL已解锁,使用[TEESimulator-RS模块隐藏](https://github.com/Enginex0/TEESimulator-RS)
 需要配置/data/adb/tricky_store/目录下的target.txt文件，在其中添加软件包名（实时生效无需重启）
@@ -362,12 +361,9 @@ data 隔离？
 > 未知
 
 ## Miscellaneous Check(4/5/6/7/8/9)
-> 一些有关模拟器虚拟机/模拟器的检测/改机行为检测
+> 一些有关模拟器虚拟机/模拟器的检测/改机行为检测/三方&移植ROM
 > 
-> 会有误报情况
-
-## Miscellaneous Check(不一致挂载)
-> 实验性检测，请忽略
+> 在国外设备Poco/三星误报情况（待修复）
 
 ## 异常文件
 - 检测路径：/dev和/data/local/tmp
