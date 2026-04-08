@@ -12,8 +12,13 @@
 > Select one of the following languages to view the solution file.
 > 
 >请选择以下语言之一来查看解决方案文件。
+> 
 [中文](/language/answer_zh.md)|[English](/language/answer_en.md)
 
+> There are many embedded links in the document (highlighted in blue). You can click on them to be redirected to the relevant embedded address.
+> 
+> 文档中有很多嵌入式链接存在（蓝提醒色）你可以点击它，会跳转到嵌入的相关地址。
+> 
 ## Feedback or participate in translation
 You can branch and modify the warehouse and then pull the request, and I will check and decide whether to merge.
 
