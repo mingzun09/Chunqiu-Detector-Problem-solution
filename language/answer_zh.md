@@ -57,6 +57,8 @@
 ## Found property
 执行[此sh](https://github.com/mingzun09/Chunqiu-Detector-Problem-solution/blob/main/File/Found%20property.sh)尝试解决
 
+## Tricky store Hook/2
+> 更换模块[TEESimulator](https://github.com/JingMatrix/TEESimulator)
 
 ## 发现Trickystore/类似模块
 > 尝试1
