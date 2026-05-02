@@ -4,17 +4,16 @@
 > 文档链接：[github](https://github.com/mingzun09/Chunqiu-Detector-Problem-solution)
 
 ## 你尝试但过不掉的检测
-那么请开lssues并提供你的模块列表信息以及使用了哪些xp模块，我有时间的话会回复
-并帮助
+那么请开lssues并提供你的模块列表信息以及使用了哪些xp模块，我有时间的话会回复并帮助
 
 # 内存异常
 > 清楚检测器数据后若还存在，那么请开lssues并提供你的模块列表信息以及使用了哪些xp模块，我有时间会研究的
 > 
-# Futile hide 1
-> 很少人出现，暂时未知原因，暂时可靠的解决方案
+# Futile hide 1 ?
+> 很少人出现，暂时未知原因，暂时无可靠的解决方案
 > 
-# 风险应用
-> 暂时未知的手段，自行尝试使用HMA-oss对检测器隐藏某些可能是风险的应用程序
+# 风险应用 ?
+> 暂时未知的词条，自行尝试使用HMA-oss对检测器隐藏某些可能是风险的应用程序
 > 
 # mountinfo
 > 通过两种手段获取出来的挂载视图不一样。可能存在隐瞒的问题。
@@ -126,6 +125,7 @@
 ## [Hook] Suspicious library injection
 (zygisk/riru/xposed)
 检测到HOOK，自行排查原因，因素过多
+
 ## SU list（已被删除）
 > 检测到类似ksu的ROOT权限排除列表
 > 
