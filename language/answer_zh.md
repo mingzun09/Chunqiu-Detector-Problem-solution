@@ -29,9 +29,7 @@
 > 排除列表策略-仅还原挂载。
 
 ## Inconsistent mount
-> /proc/self/exe/解析出其中部分的挂载，然后再去看文件系统类型是否一致。
-> FuseFixer方面的东西影响？
-> 小米手机上误报？
+> /proc/self/exe/解析出其中部分的挂载，然后再去看文件系统类型是否一致。（挂载的类型不同）
 > 
 ## TEE环境不可信
 > [来自Tencent](https://github.com/Tencent/soter)
