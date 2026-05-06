@@ -33,7 +33,8 @@
 
 ## Inconsistent mount
 > /proc/self/exe/解析出其中部分的挂载，然后再去看文件系统类型是否一致。（挂载的类型不同）
-> 
+> 存在暂未修复的误报现象
+>
 ## TEE环境不可信
 > [来自Tencent](https://github.com/Tencent/soter)
 > 与微信的指纹差不多。
@@ -68,6 +69,7 @@
 执行[此sh](https://github.com/mingzun09/Chunqiu-Detector-Problem-solution/blob/main/File/Found%20property.sh)尝试解决
 
 ## Tricky store Hook/2
+> 侧信道（不稳定）
 > 更换模块[TEESimulator](https://github.com/JingMatrix/TEESimulator)
 
 ## 发现Trickystore/类似模块
