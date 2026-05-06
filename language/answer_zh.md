@@ -20,7 +20,12 @@
 > 通过两种手段获取出来的挂载视图不一样。可能存在隐瞒的问题,有时某服务处理不及时就会报awa（极早 mountinfo 快照 vs 后期对照）
 >
 # Drity Device(a)
-> 检测到内核接口？使用了外挂驱动
+> 检测到内核接口？外挂sh?
+>检测到/storage/emulated/0/目录有文件夹/文件
+>名称有sh？
+>尝试重启手机或刷机
+>删除在/storage/emulated/0/带有sh字样的文件
+>夹/文件
 
 ## zygote test (1)
 > 打开zygisk next的链接器功能与匿名内存功能尝试解决。
