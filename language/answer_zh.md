@@ -12,7 +12,7 @@
 
 # 设备取得ROOT权限
 > 新加入的SELinux特性（应用程序 zygote 拥有访问 /sys/fs/selinux/access 的权限）
-> 更新KSU管理器并开启对应功能
+> 更新KSU管理器并开启selinux_hide功能
 
 # fdinfo mnt 采样异常（c）
 > 复现不稳定，误报处理
