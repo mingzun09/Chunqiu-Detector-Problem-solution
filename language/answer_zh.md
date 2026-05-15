@@ -3,15 +3,14 @@
 >解决方案尾巴带“?”符号的都为不确定
 > 文档链接：[github](https://github.com/mingzun09/Chunqiu-Detector-Problem-solution)
 
-## 你尝试但过不掉的检测
-那么请开lssues并提供你的模块列表信息以及使用了哪些xp模块，我有时间的话会回复。
-并帮助
+## 自行尝试但仍然无法通过的检测
+可以考虑开lssues并提供你的模块列表信息以及使用了哪些xp模块等详细修改，我有时间会回复/帮助。
 
 # Looper fd图异常
 > 正在分析复现，待补充...
 
 # HMA或许存在
-> 疑似检测旧版使用Scene_Hide-eBPF模块行为（检测不到scene包名，但检测到相关服务）
+> 疑似检测旧版使用Scene_Hide-eBPF模块行为（检测不到scene应用程序存在，但检测到相关服务）
 > 
 > [分支项目/拉取更新重新构建模块并刷入](https://github.com/Andrea-lyz/Scene-Port-Hider-by-eBPF)
 
@@ -36,10 +35,11 @@
 > 很少人出现，暂时未知原因，暂时可靠的解决方案
 > 
 # 风险应用
-> 暂时未知的手段，自行尝试使用HMA-oss对检测器隐藏某些可能是风险的应用程序
+> 暂时未知的手段，自行尝试使用HMA-oss对检测器隐藏某些可能是风险的应用程序。
 > 
 # mountinfo
 > 通过两种手段获取出来的挂载视图不一样。可能存在隐瞒的问题,有时某服务处理不及时就会报awa（极早 mountinfo 快照 vs 后期对照）
+> 小米设备通常在开机后系统高占用时，打开检测器会出现，此检测项
 >
 # Drity Device(a)
 > 检测到内核接口？外挂sh?
@@ -52,21 +52,26 @@
 ## zygote test (1)
 > 打开zygisk next的链接器功能与匿名内存功能尝试解决。
 > 排除列表策略-仅还原挂载。
+> 不稳定检测，偶发性
 
 ## Inconsistent mount
 > /proc/self/exe/解析出其中部分的挂载，然后再去看文件系统类型是否一致。（挂载的类型不同）
-> 存在暂未修复的误报现象（3.4版本中已修复）
+> 存在部分设备暂未修复的误报现象（3.4版本中已修复）
 >
 ## TEE环境不可信
 > [来自Tencent](https://github.com/Tencent/soter)
 > 与微信的指纹差不多。
 > 等待模块更新或者
 > 或者使用HMA-OSS对检测器隐藏Soter系统服务应用程序，尝试解决（在3.2fix中被修复？尚未确定）
+> 可使用susfs对相关服务路径sus来解决
 
 > 更换为TEESimulator/RS版，尝试解决
 
 ## Tampered Attentionkey(X)
-> 针对TEE的检测，若有，“请等待相关模块更新修复”，或者回锁
+> 携带20+类异常标签（多数是OEM特有标签）针对TEE处理异常标签反馈来对照预期值进行判断是否异常。
+
+> 针对TEE的检测，若有，“请等待相关模块更新修复”，或者回锁。
+
 即使是efisp 的假锁或者自定义引导程序也“可能”会报
 > 
 > 15   HanAttest 链不一致（与下面 TeeSim 常量不同源，但同在 mask 里）
@@ -91,7 +96,7 @@
 执行[此sh](https://github.com/mingzun09/Chunqiu-Detector-Problem-solution/blob/main/File/Found%20property.sh)尝试解决
 
 ## Tricky store Hook/2
-> 侧信道（不稳定）
+> 测信道（不稳定）重新打开或许消失
 > 更换模块[TEESimulator](https://github.com/JingMatrix/TEESimulator)
 
 ## 发现Trickystore/类似模块
@@ -101,12 +106,8 @@
 >尝试2
 把/data/adb/Tricky store/security_patch.txt文件删除
 
-> 尝试3
-或者在[TEESimulator](https://github.com/JingMatrix/TEESimulator)模块存在的基础上，先刷入TS-Enhancer-Extreme模块的[0.8.2.1版本](https://t.me/chunqiudetector/10461)重启后开机再去刷入[v1.0版本](https://t.me/chunqiudetector/10460)
-覆盖刷入后可以解决，记得备份keybox，以上行为会覆盖原有的keybox文件
-
 ## TEE伪造
-> 使用TEESimulator-RS模块解决
+> 使用TEESimulator模块解决，使用证书链生成模式。
 
 ## Property Modified（数字代表几处属性修改）
 > 原理是查属性区空洞，如果说有存在空洞的话，说明存在属性修改。
@@ -114,15 +115,15 @@
 > 隐藏被修改的属性可将shamiko模块中的[shamiko.sh]([https://t.me/chunqiudetector/10259](https://github.com/mingzun09/Chunqiu-Detector-Problem-solution/blob/main/File/shamiko_Plus.sh))文件添加并移动到/data/adb/service.d/目录下并重启，尝试解决。
 
 ## 环境存疑1（实验性检测）
-> 在HMA-OSS中对检测器开启黑名单模式隐藏后，若勾选了设置预设中的“输入法”选项后，次检测项就会出现？
+> 在HMA-OSS中对检测器开启黑名单模式隐藏后，若勾选了设置预设中的“输入法”选项后，此检测项就会出现？
 
 ## Evil Service
-> 关于lsp shuziku 还有一些xp模块的检测
+> 关于lsp shuziku 还有一些xp模块的修改检测
 
 ## Found ksu/免解设备
-> 发现ksu处于越狱模式，当前设备使用ksu越狱模式的ROOT方式
->
-> 或者发现ksu进程等其他因素
+> 发现ksu处于越狱模式，当前设备使用ksu越狱模式的ROOT方式或者发现ksu进程等其他因素。
+
+> 不推荐使用越狱模式，所以不提供解决方案
 
 ## SU binary detected
 > 检测到SU二进制文件（检测到ROOT）
@@ -182,14 +183,15 @@
 > 当前是模拟器设备
 
 ## avb校验异常 avb=2.0
+
 > avb版本异常
 > 
-> 某些模块会造成此问题，比如改机型模块
+> 某些模块会造成此问题，比如改机型模块，自行排查模块尝试解决。
 
 ## Found LSPHook Framework
 > 检测到LSPhook Framework
 > 
-> 某些xp模块导致,也可卸载更换LSP模块
+> 某些xp模块修改导致,也可卸载更换LSP模块
 
 ## 检测到Scene端口占用
 > 请查看此[项目](https://github.com/Andrea-lyz/Scene-Port-Hider-by-eBPF)并尝试解决
@@ -322,7 +324,7 @@ data 隔离？
 ## 异常进程0000(pid）
 > 0000代表的是进程的pid
 > 
-> 你可以尝试使用shell指令以root执行“ps -ef | grep 数字id”来查找对应pid进程,通常是LSP进程
+> 你可以尝试使用shell指令以root执行“ps -ef | grep 数字id”来查找对应pid进程,通常是lspd进程
 > 
 > 也可以在系统设置中随便开一个软件分身尝试解决
 
@@ -350,6 +352,7 @@ data 隔离？
 > 尝试使用Tricky Store或者[TEESimulator-RS](https://github.com/Enginex0/TEESimulator-RS)模块解决
 搭配[TS插件使用](https://github.com/KOWX712/Tricky-Addon-Update-Target-List/releases/tag/v5.0-beta.1)
 刷入后请重启，开机后打开模块的webuI进行配置。
+> TEE损坏的设备请使用生成证书链模式
 
 ## 密钥证明未完成或链不一致
 > 使用[TEESimulator-RS](https://github.com/Enginex0/TEESimulator-RS)并配置后尝试解决
