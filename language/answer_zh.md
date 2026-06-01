@@ -17,6 +17,8 @@
 # 存在模块修改春秋
 > 使用IsolPolicy模块后出现，关闭作用域或者卸载模块解决
 
+> 并不是只有模块，比如说类似于面具的隐藏也算
+
 # 设备取得ROOT权限
 > 新加入的SELinux特性（应用程序 zygote 拥有访问 /sys/fs/selinux/access 的权限）
 > KSU使用者[更新KSU管理器](https://t.me/KernelSU_group/3234/478759)并重新修补镜像并刷入后重启再开启selinux_hide功能解决
