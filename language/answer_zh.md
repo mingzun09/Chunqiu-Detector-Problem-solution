@@ -21,7 +21,7 @@
 
 # 检测SELinux Policy时发现可疑问题
 > 新加入的SELinux特性（应用程序 zygote 拥有访问 /sys/fs/selinux/access 的权限）
-> KSU使用者[更新KSU管理器]([https://t.me/KernelSU_group/3234/482579])并重新修补镜像并刷入后重启再开启selinux_hide功能解决
+> KSU使用者[更新KSU管理器](https://t.me/KernelSU_group/3234/482579)并重新修补镜像并刷入后重启再开启selinux_hide功能解决
 >
 >APatch/FolkPatch使用者[加载/嵌入此kpm](https://t.me/APatch_nightly/118)
 >
