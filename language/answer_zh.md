@@ -199,6 +199,8 @@
 > 请查看此[项目](https://github.com/Andrea-lyz/Scene-Port-Hider-by-eBPF)并尝试解决
 > 
 > 无视此检测项，或者关闭scene的无障碍权限
+>
+> 将scene更新到9.3.1以上
 
 ## Zygisk detected
 > 检测到Zygisk,通常是magisk自带的zygisk导致（关闭解决）或者其他原因
