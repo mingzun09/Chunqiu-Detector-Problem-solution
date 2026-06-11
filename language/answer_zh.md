@@ -4,7 +4,11 @@
 > 文档链接：[github](https://github.com/mingzun09/Chunqiu-Detector-Problem-solution)
 
 ## 自行尝试但仍然无法通过的检测
-可以考虑开lssues并提供你的模块列表信息以及使用了哪些xp模块等详细修改，我有时间会回复/帮助。
+请开Issues并提供 你的模块列表信息+使用了哪些xp模块等详细修改 我有时间会回复/帮助。
+
+# Miscellaneous Check(12)
+> LSPosed泄露Zygisk检测点
+> 尝试卸载LSPosed/更换ReZygisk/等待模块更新
 
 # Looper fd图异常
 > 正在分析复现，待补充...
@@ -25,24 +29,24 @@
 >
 >APatch/FolkPatch使用者[加载/嵌入此kpm](https://t.me/APatch_nightly/118)
 >
->Magisk......
+>Magisk......尝试更换内核级管理器
 
 # fdinfo mnt 采样异常（c）
 > 复现不稳定，误报处理（无视存在）
 
 # 内存异常
-> 清楚检测器数据后若还存在，那么请开lssues并提供你的模块列表信息以及使用了哪些xp模块，我有时间会研究的
-> 
+> 清除检测器数据后若还存在，那么请开lssues并提供你的模块列表信息以及使用了哪些xp模块，我有时间会研究的
+
 # Futile hide 1
-> 很少人出现，暂时未知原因，暂时可靠的解决方案
-> 
+> 很少人出现，暂时未知原因，暂时没有可靠的解决方案
+
 # 风险应用
 > 暂时未知的手段，自行尝试使用HMA-oss对检测器隐藏某些可能是风险的应用程序。
-> 
+
 # mountinfo
 > 通过两种手段获取出来的挂载视图不一样。可能存在隐瞒的问题,有时某服务处理不及时就会报awa（极早 mountinfo 快照 vs 后期对照）
 > 小米设备通常在开机后系统高占用时，打开检测器会出现，此检测项
->
+
 # Drity Device(a)
 > 检测到内核接口？外挂sh?
 >检测到/storage/emulated/0/目录有文件夹/文件
@@ -59,7 +63,7 @@
 ## Inconsistent mount
 > /proc/self/exe/解析出其中部分的挂载，然后再去看文件系统类型是否一致。（挂载的类型不同）
 > 存在部分设备暂未修复的误报现象（3.4版本中已修复）
->
+
 ## TEE环境不可信
 > [来自Tencent](https://github.com/Tencent/soter)
 > 与微信的指纹差不多。
@@ -67,32 +71,30 @@
 > 或者使用HMA-OSS对检测器隐藏Soter系统服务应用程序，尝试解决（在3.2fix中被修复？尚未确定）
 > 可使用susfs对相关服务路径sus来解决
 
-> 更换为TEESimulator/RS版，尝试解决
-
 ## Tampered Attentionkey(X)
 > 携带20+类异常标签（多数是OEM特有标签）针对TEE处理异常标签反馈来对照预期值进行判断是否异常。
-
+>
 > 针对TEE的检测，若有，“请等待相关模块更新修复”，或者回锁。
+>
+> 即使是efisp 的假锁或者自定义引导程序也“可能”会报
 
-即使是efisp 的假锁或者自定义引导程序也“可能”会报
-> 
-> 15   HanAttest 链不一致（与下面 TeeSim 常量不同源，但同在 mask 里）
-> 
-> 18   ：厂商占位 KeyMint tag 仍成功出钥（tee2 §1）
+> 15: HanAttest 链不一致（与下面 TeeSim 常量不同源，但同在 mask 里）
 
-> 23   ：叶证书 KeyUsage 与扩展内 KeyPurpose 矛盾
+> 18: 厂商占位 KeyMint tag 仍成功出钥（tee2 §1）
 
-> 24   ：Binder 超长 alias / 大事务探针异常
+> 23: 叶证书 KeyUsage 与扩展内 KeyPurpose 矛盾
 
-> 25   ：叶证书 SigAlg 与签发钥算法不符
+> 24: Binder 超长 alias / 大事务探针异常
 
-> 26   ：证书 patch 标签与系统属性不一致（与安全补丁有关）（修改或者删除/data/adb/tricky_store/security_patch.txt尝试解决）
+> 25: 叶证书 SigAlg 与签发钥算法不符
 
-> 27   ：USER_ID 出现在 teeEnforced
+> 26: 证书 patch 标签与系统属性不一致（与安全补丁有关）（修改或者删除/data/adb/tricky_store/security_patch.txt尝试解决）
 
-> 29   ：无 challenge 却有 APPLICATION_ID（上表）
+> 27: USER_ID 出现在 teeEnforced
 
-> 30   ：敏感设备标识类 attest 未被拒绝（如 SERIAL）
+> 29: 无 challenge 却有 APPLICATION_ID（上表）
+
+> 30: 敏感设备标识类 attest 未被拒绝（如 SERIAL）
 
 ## Found property
 执行[此sh](https://github.com/mingzun09/Chunqiu-Detector-Problem-solution/blob/main/File/Found%20property.sh)尝试解决
@@ -101,7 +103,7 @@
 > 测信道（不稳定）重新打开或许消失
 > 更换模块[TEESimulator](https://github.com/JingMatrix/TEESimulator)
 
-## 发现Trickystore/类似模块
+## 发现TrickyStore/类似模块
 > 尝试1
 更换模块比如[TEESimulator](https://github.com/JingMatrix/TEESimulator)
 
@@ -109,7 +111,7 @@
 把/data/adb/Tricky store/security_patch.txt文件删除
 
 ## TEE伪造
-> 使用TEESimulator模块解决，使用证书链生成模式。
+> 使用TEESimulator(RS)模块解决，使用证书链生成模式。
 
 ## Property Modified（数字代表几处属性修改）
 > 原理是查属性区空洞，如果说有存在空洞的话，说明存在属性修改。
@@ -157,14 +159,14 @@
 ## SU list（已被删除）
 > 检测到类似ksu的ROOT权限排除列表
 > 
-> 次检测项不稳定偶尔出现（通常使用KSU LKM模式的较多）
+> 此检测项不稳定偶尔出现（通常使用KSU LKM模式的较多）
 
-## Abormal Environment
+## Abnormal Environment
 > 检测到KSU/APatch/Magisk
 > 
 > 测信道检测,更新你的根管理器并重新修补
 
-## AbnormalEnvironment(04)
+## Abnormal Environment(04)
 > 新版更改为函数调用检测（不稳定？）
 > 
 > 等待ROOT管理器/模块更新？
@@ -207,7 +209,7 @@
 > 
 > 更新[zygisk next模块](http://github.com/Dr-TSNG/ZygiskNext)
 
-## Tmpered kernel
+## Tampered kernel
 > 内核信息校验异常(内核字符版本，内核构建时间)
 > 
 > 尝试使用SUSFS隐藏或者还原未修改的boot.img
@@ -226,12 +228,10 @@
 > 
 > tmp的inode值高于10000(被删除过)
 > 
-> 格式化系统或者使用SUSFS对路径伪装inode值大小<1000
+> 格式化系统或者使用SUSFS对路径伪装inode值小于1000
 
 ## Suspicious Surroundings（c）
-> /data/local/tmp
-> 
-> 文件夹tmp的权限被修改（默认771）
+> /data/local/tmp 的权限被修改（默认771）
 
 ## Futile hide
 > 以下方案可能过时
@@ -252,7 +252,7 @@
 data 隔离？
 
 ## 不一致的挂载/debug_ramdisk
-> umout /debug_ramdisk
+> umount /debug_ramdisk
 
 ## Netlink socket anomaly
 > 暂时未知
@@ -275,7 +275,7 @@ data 隔离？
 ## 挂载间隙
 > 检测挂载异常
 > 
-> 尝试更换""元模块"解决或者更新ROOT管理器
+> 尝试更换"元模块"解决或者更新ROOT管理器
 
 ## 2222
 > 检测挂载异常
@@ -345,7 +345,7 @@ data 隔离？
 > 安装[Unicode零宽修复模块](https://t.me/real5ec1cff/268)对/storage/emulated/0/Android/data/目录修复可被读取问题并搭配HMA-OSS对风险应用隐藏。
 
 ## Thanox service detected
-> 检测Thanon服务
+> 检测到Thanox服务
 > 
 > 可以使用这个xp模块来隐藏[hideThanox](https://t.me/Suxiaomingpd/125)
 
@@ -355,16 +355,16 @@ data 隔离？
 ## TEE 损坏
 > 尝试使用Tricky Store或者[TEESimulator-RS](https://github.com/Enginex0/TEESimulator-RS)模块解决
 搭配[TS插件使用](https://github.com/KOWX712/Tricky-Addon-Update-Target-List/releases/tag/v5.0-beta.1)
-刷入后请重启，开机后打开模块的webuI进行配置。
+刷入后请重启，开机后打开模块的webUI进行配置。
 > TEE损坏的设备请使用生成证书链模式
 
 ## 密钥证明未完成或链不一致
 > 使用[TEESimulator-RS](https://github.com/Enginex0/TEESimulator-RS)并配置后尝试解决
 
-## AosP密钥
+## AOSP密钥
 > 更换/data/adb/Tricky Store/目录下的'keybox.xml'文件
 也可选择刷入[TS插件](https://github.com/KOWX712/Tricky-Addon-Update-Target-List/releases/tag/v5.0-beta.1)
-重启后打开模块的webui界面进行秘钥配置
+重启后打开模块的webui界面进行密钥配置
 
 ## Boot Hash不匹配
 > boot镜像的Hash不匹配
