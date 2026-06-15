@@ -3,7 +3,7 @@
 >解决方案尾巴带“?”符号的都为不确定
 > 文档链接：[github](https://github.com/mingzun09/Chunqiu-Detector-Problem-solution)
 
-## 自行尝试但仍然无法通过的检测
+# 自行尝试但仍然无法通过的检测
 请开Issues并提供 你的模块列表信息+使用了哪些xp模块等详细修改 我有时间会回复/帮助。
 
 # Miscellaneous Check(12)
@@ -23,16 +23,16 @@
 
 > 并不是只有模块，比如说类似于面具的隐藏也算（比如SELinux修改隐藏）请尝试跟进相关root管理器最新CI来解决此问题
 
-# 检测SELinux Policy时发现可疑问题
-> 新加入的SELinux特性（应用程序 zygote 拥有访问 /sys/fs/selinux/access 的权限）
+# 检测SELinux Policy时发现可疑问题 / 检测到ROOT权限
+> 新加入的SELinux特性检测（应用程序 zygote 拥有访问 /sys/fs/selinux/access 的权限）
 > KSU使用者[更新KSU管理器](https://t.me/KernelSU_group/3234/482579)并重新修补镜像并刷入后重启再开启selinux_hide功能解决
->
->APatch/FolkPatch使用者[加载/嵌入此kpm](https://t.me/APatch_nightly/118)
->
->Magisk......尝试更换内核级管理器
+
+> APatch/FolkPatch使用者[加载/嵌入此kpm](https://t.me/APatch_nightly/118)
+
+> Magisk......尝试更换内核级管理器
 
 # fdinfo mnt 采样异常（c）
-> 复现不稳定，误报处理（无视存在）
+> 大概率为检测到USB调试痕迹，小概率误报。可使用脚本[调试痕迹消除](https://github.com/YiJieqwq/ADB-Trace-Cleaner/releases)尝试解决
 
 # 内存异常
 > 清除检测器数据后若还存在，那么请开lssues并提供你的模块列表信息以及使用了哪些xp模块，我有时间会研究的
@@ -65,11 +65,13 @@
 > 存在部分设备暂未修复的误报现象（3.4版本中已修复）
 
 ## TEE环境不可信
-> [来自Tencent](https://github.com/Tencent/soter)
-> 与微信的指纹差不多。
-> 等待模块更新或者
-> 或者使用HMA-OSS对检测器隐藏Soter系统服务应用程序，尝试解决（在3.2fix中被修复？尚未确定）
-> 可使用susfs对相关服务路径sus来解决
+> 来自Tencent的[SoterService](https://github.com/Tencent/soter)
+> 作用: 微信的指纹支付等。
+ 
+解决方法:
+
+> 等待模块更新 (不太可能实现SoterService的修复)
+> 使用susfs隐藏相关服务路径，并使用HMA-OSS对检测器隐藏Soter系统服务应用程序尝试解决
 
 ## Tampered Attentionkey(X)
 > 携带20+类异常标签（多数是OEM特有标签）针对TEE处理异常标签反馈来对照预期值进行判断是否异常。
@@ -219,19 +221,20 @@
 > 未知
 
 ## Suspicious Surroundings (a)
-> 路径/data/local/tmp
-> 
-> tmp文件夹被设置为root用户和所有组,改为shell即可
+> /data/local/tmp 文件夹所有组异常
+
+解决方案: 所有组改为shell
 
 ## Suspicious Surroundings（b）
-> 路径/data/local/tmp
-> 
-> tmp的inode值高于10000(被删除过)
-> 
-> 格式化系统或者使用SUSFS对路径伪装inode值小于1000
+> 路径/data/local/tmp 文件夹的inode值高于10000
+
+解决方案: 将设备恢复出厂设置 / 使用SUSFS对路径伪装inode值小于1000 / 尝试使用[过ssb脚本](https://github.com/YiJieqwq/Low-Inode-Swapper/releases)解决
+
 
 ## Suspicious Surroundings（c）
 > /data/local/tmp 的权限被修改（默认771）
+
+解决方案: 重新设置权限
 
 ## Futile hide
 > 以下方案可能过时
@@ -437,6 +440,8 @@ data 隔离？
      /storage/emulated/0/Android/naki
      /data/swap_config.conf
      /data/local/tmp/resetprop
+     ```
+
 ## Magic Mount
 > 使用zygisk next的排除策略>仅还原挂载
 > 并配置排除列表/开启默认卸载模块
