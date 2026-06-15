@@ -3,14 +3,14 @@
 > Solutions with "?" at the end are uncertain.
 > Document Link: [github](https://github.com/mingzun09/Chunqiu-Detector-Problem-solution)
 
-## Detections you tried but can't pass
+# Detections you tried but can't pass
 Consider opening an issue with your module list and which Xposed modules you're using, etc. I'll reply/help when I have time.
 
 # Miscellaneous Check(12)
 > LSPosed leaking Zygisk detection point.
 > Try uninstalling LSPosed / switching to ReZygisk / waiting for module updates.
 
-# Looper fd Graph Anomaly
+# Looper fd Graph Abnomaly
 > Under analysis for reproduction, to be supplemented...
 
 # HMA Possibly Present
@@ -23,7 +23,7 @@ Consider opening an issue with your module list and which Xposed modules you're 
 
 > It's not just modules — Magisk's hide features (e.g., SELinux modification hiding) can also trigger this. Try updating to the latest CI version of your root manager to resolve.
 
-# Suspicious SELinux Policy Detected
+# Suspicious SELinux Policy Detected / ROOT Detected
 > New SELinux feature (app zygote has access to `/sys/fs/selinux/access`).
 > 
 > **KSU users:** [Update KSU Manager](https://t.me/KernelSU_group/3234/482579), re-patch image, flash, reboot, then enable selinux_hide feature.
@@ -32,10 +32,10 @@ Consider opening an issue with your module list and which Xposed modules you're 
 >
 > **Magisk:** ...try switching to a kernel-level manager.
 
-# fdinfo mnt Sampling Anomaly (c)
-> Unstable to reproduce, treat as false positive (ignore).
+# fdinfo mnt Sampling Abnomaly (c)
+> Likely detects USB debugging traces, low probability false positive. Try using the [ADB Trace Cleaner](https://github.com/YiJieqwq/ADB-Trace-Cleaner/releases) script to resolve.
 
-# Memory Anomaly
+# Memory Abnomaly
 > Clear the detector app data first. If it persists, open an issue with your module list and Xposed modules.
 
 # Futile hide 1
@@ -43,7 +43,6 @@ Consider opening an issue with your module list and which Xposed modules you're 
 
 # Risky Applications
 > Means of detection unknown. Try using HMA-OSS to hide potentially risky apps from the detector.
-
 
 # mountinfo
 > Mount views obtained via two different methods are inconsistent, suggesting potential concealment. Sometimes a service doesn't process in time and triggers this (early mountinfo snapshot vs. late comparison).
@@ -65,17 +64,14 @@ Consider opening an issue with your module list and which Xposed modules you're 
 > Parses part of the mount from `/proc/self/exe/`, then checks if file system types are consistent.
 > Some devices have unfixed false positives (fixed in version 3.4).
 
-
 # TEE Environment Untrusted
 > [From Tencent](https://github.com/Tencent/soter)
 > Similar to WeChat's fingerprint.
-> Wait for module updates, or use HMA-OSS to hide Soter system service from the detector (fixed in 3.2fix? Not yet confirmed).
-> Can use SUSFS to hide related service paths.
+> Module updates to fix SoterService are unlikely. Use SUSFS to hide related service paths, and use HMA-OSS to hide the Soter system service app from the detector.
 > Switch to TEESimulator/RS version to try resolving.
 
-
 # Tampered Attentionkey(X)
-> Carries 20+ types of anomaly tags (mostly OEM-specific). Targets TEE's handling of anomaly tag feedback against expected values.
+> Carries 20+ types of abnomaly tags (mostly OEM-specific). Targets TEE's handling of abnomaly tag feedback against expected values.
 > For TEE detection — if present, wait for module updates or re-lock the bootloader.
 > Even efisp's fake lock or custom bootloader "may" trigger this.
 
@@ -83,9 +79,9 @@ Consider opening an issue with your module list and which Xposed modules you're 
 > - 15: HanAttest chain inconsistency
 > - 18: Vendor placeholder KeyMint tag still successfully issued a key (tee2 §1)
 > - 23: Leaf certificate KeyUsage contradicts KeyPurpose in extensions
-> - 24: Binder over-long alias / large transaction probe anomaly
+> - 24: Binder over-long alias / large transaction probe abnomaly
 > - 25: Leaf certificate SigAlg does not match issuing key algorithm
-> - 26: Certificate patch tag inconsistent with system properties (related to security patches; try modifying/deleting `/data/adb/tricky_store/security_patch.txt`)
+> - 26: Certificate patch tag inconsistent with system properties (related to security patches; [execute this sh script](https://github.com/mingzun09/Chunqiu-Detector-Problem-solution/blob/main/File/Tampered%20Attestation%20Key(26)Pass.sh) to try resolving)
 > - 27: USER_ID appears in teeEnforced
 > - 29: APPLICATION_ID present without a challenge
 > - 30: Sensitive device identifier attestations not rejected (e.g., SERIAL)
@@ -119,7 +115,9 @@ Consider opening an issue with your module list and which Xposed modules you're 
 # Found ksu/No-unlock Device
 > KSU detected in jailbreak mode, or KSU processes detected.
 >
-> **Solution:** Simply reboot once.
+> Jailbreak mode is not recommended, so no official solution is provided here.
+>
+> **Solution (use at your own risk):** Simply reboot once.
 > For no-unlock users: flash an all-in-one hide script.
 > 
 > ```
@@ -162,12 +160,12 @@ Consider opening an issue with your module list and which Xposed modules you're 
 > SU binary detected (ROOT detected).
 
 # Miscellaneous Check (a)
-> dex2at detected (Usually an LSP issue; replace/update the LSP module).
+> dex2oat detected (Usually an LSP issue; replace/update the LSP module).
 
 # Mount loophole
 > Magic Mount takes effect for system modification module mounts. Use other modules (susfs/zygisk next) to hide.
 > 
-> Use Zygisk Next's exclusion strategy > Restore mount only. Configure the exclusion list / enable default module unmounting.
+> Use Zygisk Next's exclusion strategy → Restore mount only. Configure the exclusion list / enable default module unmounting.
 
 # Magic Mount
 > Magic Mount detected. Try excluding certain system-modifying modules. Use Zygisk Next's exclusion strategy to hide.
@@ -180,14 +178,14 @@ Consider opening an issue with your module list and which Xposed modules you're 
 > Detected a ROOT permission exclusion list similar to KSU's.
 > Unstable, appears occasionally (more common with KSU LKM mode).
 
-# Abnormal Environment
+# Anormal Environment
 > KSU/APatch/Magisk detected. Side-channel detection. Update your root manager and re-patch.
 
-# Abnormal Environment (04)
+# Anormal Environment (04)
 > New version changed to function call detection (unstable?).
 > Waiting for root manager/module updates? May appear after enabling APatch's exclusion modification.
 
-# KnelsU loop device
+# kernelSU loop device
 > KSU detected. Update your manager and re-patch / disable meta-modules.
 
 # Suspicious Surroundings
@@ -196,8 +194,8 @@ Consider opening an issue with your module list and which Xposed modules you're 
 # Device is an Emulator
 > Current device is an emulator device.
 
-# avb verification abnormal avb=2.0
-> Abnormal avb version. Certain modules (e.g., device model changers) can cause this.
+# avb verification anormal avb=2.0
+> Anormal avb version. Certain modules (e.g., device model changers) can cause this.
 > Uninstall model-changing modules or use Device Faker for specific apps instead of globally.
 
 # Found LSPHook Framework
@@ -213,7 +211,7 @@ Consider opening an issue with your module list and which Xposed modules you're 
 > Update the [Zygisk Next module](https://github.com/Dr-TSNG/ZygiskNext).
 
 # Tampered kernel
-> Kernel information checksum abnormal (kernel version string, kernel build time).
+> Kernel information checksum anormal (kernel version string, kernel build time).
 > Try using SUSFS to hide it or restore the unmodified `boot.img`.
 
 # [hook] Resetprop modified
@@ -221,12 +219,13 @@ Consider opening an issue with your module list and which Xposed modules you're 
 
 # Suspicious Surroundings (a)
 > Path: `/data/local/tmp`
-> The `tmp` folder is set to root user and group. Change owner to shell.
+> The `tmp` folder is set to root user and group. Change group to shell.
 
 # Suspicious Surroundings (b)
 > Path: `/data/local/tmp`
 > The `tmp` folder's inode value > 10000 (has been deleted before).
 > Format the system or use SUSFS to spoof inode value < 1000.
+> Or try using the [Low-Inode-Swapper script](https://github.com/YiJieqwq/Low-Inode-Swapper/releases) to resolve.
 
 # Suspicious Surroundings (c)
 > `/data/local/tmp` — permissions modified (default is 771).
@@ -259,14 +258,14 @@ Consider opening an issue with your module list and which Xposed modules you're 
 > Select `post-fs-data` during the kernel spoofing startup phase.
 
 # Futile hide 04
-> Principle: Mount namespace? Mount abnormality detected.
+> Principle: Mount namespace? Mount anormality detected.
 > Try replacing the "meta-module" to resolve.
 
 # Mount Gap
-> Mount abnormality detected. Try replacing the meta-module or updating the root manager.
+> Mount anormality detected. Try replacing the meta-module or updating the root manager.
 
 # 2222
-> Mount abnormality detected.
+> Mount anormality detected.
 
 # Third-party Kernel
 > Kernel information matches a preset list.
@@ -294,17 +293,17 @@ Consider opening an issue with your module list and which Xposed modules you're 
 > Use SUSFS features or the ZN-AuditPatch module.
 > Fixed in Android security update 2025/09/01 (not entirely accurate, but that's the observation).
 
-# Abnormal Process
+# Anormal Process
 > Hidden process groups detected.
 > Try enabling an app clone (app twin) in system settings to resolve.
 
-# Abnormal Process 0000 (pid)
+# Anormal Process 0000 (pid)
 > 0000 represents the process PID. Run `ps -ef | grep <pid>` as root to identify the process (often an LSPosed process).
 > Alternatively, enable an app clone in system settings to resolve.
 > False positives may occur.
 
-# MT Manager (MT2 folder) / Abnormal Files
-> Detects the `mt2` folder in root directory, `boot.img` files, and `.xml` abnormal files.
+# MT Manager (MT2 folder) / Anormal Files
+> Detects the `mt2` folder in root directory, `boot.img` files, and `.xml` anormal files.
 > Change the MT2 path in MT Manager settings (custom path) and delete the old folder.
 > Check `/sdcard` for `.img` / `.xml` / `.sh` files.
 
@@ -341,7 +340,7 @@ Consider opening an issue with your module list and which Xposed modules you're 
 > Configure `target.txt` in `/data/adb/tricky_store/` by adding the app package name (takes effect in real-time, no reboot needed).
 > Also recommended: [TS-Plugin](https://github.com/KOWX712/Tricky-Addon-Update-Target-List/releases/tag/v5.0-beta.1) for visual package name configuration.
 
-# Abnormal Boot Status
+# Anormal Boot Status
 > BL unlocked. Use [TEESimulator-RS](https://github.com/Enginex0/TEESimulator-RS) to hide.
 > Configure `target.txt` in `/data/adb/tricky_store/` by adding the app package name.
 
@@ -371,10 +370,11 @@ Consider opening an issue with your module list and which Xposed modules you're 
 > Detections related to emulator/virtual machine characteristics, device modification behavior, or third-party/ported ROMs.
 > False positives on international devices like Poco/Samsung (to be fixed).
 
-# Abnormal Files
+# Anormal Files
 - Detection paths: `/dev` and `/data/local/tmp`
   1. Rename or delete relevant directory files.
   2. Investigate and delete the following high-risk paths:
+  
      ```
      /data/local/stryker
      /data/system/AppRetention
@@ -403,5 +403,5 @@ Consider opening an issue with your module list and which Xposed modules you're 
      ```
 
 # Magic Mount
-> Use Zygisk Next's exclusion strategy > Restore mount only.
+> Use Zygisk Next's exclusion strategy → Restore mount only.
 > Configure the exclusion list / enable default module unmounting to hide it.
