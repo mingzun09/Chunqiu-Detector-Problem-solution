@@ -228,7 +228,7 @@
 ## Suspicious Surroundings（b）
 > 路径/data/local/tmp 文件夹的inode值高于10000
 
-解决方案: 将设备恢复出厂设置 / 使用SUSFS对路径伪装inode值小于1000 / 尝试使用[Inode-Hijacker](https://github.com/YiJieqwq/Inode-Hijacker)脚本解决
+解决方案: 将设备恢复出厂设置 / 使用SUSFS对路径伪装inode值小于1000 / 尝试使用[Inode-Hijacker](https://github.com/YiJieqwq/Inode-Hijacker/releases)脚本解决
 
 
 ## Suspicious Surroundings（c）
