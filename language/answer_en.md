@@ -63,13 +63,13 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 > Some devices have unfixed false positives (fixed in version 3.4).
 
 ## TEE Environment Untrusted
-> [From Tencent](https://github.com/Tencent/soter)
+> [SoterService from Tencent](https://github.com/Tencent/soter)
 > Purpose: WeChat fingerprint payments, etc.
 
 Solutions:
 
 > Wait for module updates (fixing SoterService is unlikely).
-> Use SUSFS to hide related service paths, and use HMA-OSS to hide the Soter system service app from the detector.
+> Use SUSFS to hide related service paths, and use HMA-OSS to hide the Soter system service app from the detector to try resolving.
 
 ## Tampered Attentionkey(X)
 > Carries 20+ types of anomaly tags (mostly OEM-specific). Targets TEE's handling of anomaly tag feedback against expected values.
@@ -78,7 +78,7 @@ Solutions:
 >
 > Even efisp's fake lock or custom bootloader "may" trigger this.
 
-> 15: HanAttest chain inconsistency
+> 15: HanAttest chain inconsistency (different source from TeeSim constant below, but in the same mask)
 
 > 18: Vendor placeholder KeyMint tag still successfully issued a key (tee2 §1)
 
@@ -225,6 +225,7 @@ Solution: Change group to shell.
 > Path: `/data/local/tmp` folder's inode value > 10000.
 
 Solutions: Factory reset the device / Use SUSFS to spoof inode value < 1000 / Try using the [Inode-Hijacker](https://github.com/YiJieqwq/Inode-Hijacker/releases) script to resolve.
+Note: This operation may cause wired display projection to fail.
 
 ## Suspicious Surroundings (c)
 > `/data/local/tmp` — permissions modified (default is 771).
