@@ -184,7 +184,7 @@
 > 解决办法（KernelSU系）：更新你的KenrelSU管理器并重新修补（LKM工作模式）或重新集成（GKI和Non-GKI工作模式）
 > 
 > 解决办法（APatch系）：
-> 1. 安装nohello kpm，并将检测器加入到排除列表，nohello可以在kernelpatach判断cmd值之前判断发起鉴权请求的应用是否在排除列表内，如果是，则禁止鉴权。
+> 1. 安装[nohello kpm](/File/Bin/Nohello-v1.8.2.9-83-b3e7d87-release.kpm)，并将检测器加入到排除列表，nohello可以在kernelpatach判断cmd值之前判断发起鉴权请求的应用是否在排除列表内，如果是，则禁止鉴权。
 > 2. 未来版本的APatch会引入基于签名的鉴权方法，对于不符合签名却发起了鉴权的应用直接拒绝鉴权请求。目前没有完全实现，需要再等一段时间。
 
 
