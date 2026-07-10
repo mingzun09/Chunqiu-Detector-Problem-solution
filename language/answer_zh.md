@@ -16,7 +16,7 @@
 # HMA或许存在
 > 疑似检测旧版使用Scene_Hide-eBPF模块行为（检测不到scene应用程序存在，但检测到相关服务）
 > 
-> [分支项目/拉取更新重新构建模块并刷入/从Relases中下载](https://github.com/Andrea-lyz/Scene-Port-Hider-by-eBPF)
+> [分支项目/拉取更新重新构建模块并刷入/从Releases中下载](https://github.com/Andrea-lyz/Scene-Port-Hider-by-eBPF)
 
 # 存在模块修改春秋
 > 使用IsolPolicy模块后出现，关闭作用域或者卸载模块解决
@@ -38,13 +38,13 @@
 > 大概率为检测到USB调试痕迹，小概率误报。可使用脚本[调试痕迹消除](https://github.com/YiJieqwq/ADB-Trace-Cleaner/releases)尝试解决
 
 # 内存异常
-> 清除检测器数据后若还存在，那么请开lssues并提供你的模块列表信息以及使用了哪些xp模块，我有时间会研究的
+> 清除检测器数据后若还存在，那么请开Issues并提供你的模块列表信息以及使用了哪些xp模块，我有时间会研究的
 
 # Futile hide 1
 > 很少人出现，暂时未知原因，暂时没有可靠的解决方案
 
 # 风险应用
-> 暂时未知的手段，自行尝试使用HMA-oss对检测器隐藏某些可能是风险的应用程序。
+> 暂时未知的手段，自行尝试使用HMA-OSS对检测器隐藏某些可能是风险的应用程序。
 
 # mountinfo
 > 通过两种手段获取出来的挂载视图不一样。可能存在隐瞒的问题,有时某服务处理不及时就会报（极早 mountinfo 快照 vs 后期对照）
@@ -59,7 +59,7 @@
 >夹/文件
 
 ## zygote test (1)
-> 打开zygisk next的链接器功能与匿名内存功能尝试解决。
+> 打开ZygiskNext的链接器功能与匿名内存功能尝试解决。
 > 排除列表策略-仅还原挂载。
 > 不稳定检测，侧信道
 
@@ -79,8 +79,8 @@
 
 解决方法:
 
-> 等待模块更新 (不太可能实现SoterService的修复)
-> 使用susfs或PathMask隐藏相关服务路径，并使用HMA-OSS对检测器隐藏Soter系统服务应用程序尝试解决
+> 等待模块更新（不太可能实现SoterService的修复）
+> 使用SusFS或PathMask隐藏相关服务路径，并使用HMA-OSS对检测器隐藏Soter系统服务应用程序尝试解决
 
 注意：PathMask并不专注于环境隐藏，请慎用
 
@@ -95,7 +95,7 @@
 
 > 15: HanAttest 链不一致（与下面 TeeSim 常量不同源，但同在 mask 里）
 
-> 18: 厂商占位 KeyMint tag 仍成功出钥（tee2 §1）
+> 18: 厂商占位 KeyMint tag 仍成功输出密钥（tee2 §1）
 
 > 23: 叶证书 KeyUsage 与扩展内 KeyPurpose 矛盾
 
@@ -114,7 +114,7 @@
 ## Found property
 执行[此sh](https://github.com/mingzun09/Chunqiu-Detector-Problem-solution/blob/main/File/Found%20property.sh)尝试解决
 
-## Tricky store Hook/2
+## TrickyStore Hook/2
 > 测信道（不稳定）重新打开或许消失
 > 更换模块[TEESimulator](https://github.com/JingMatrix/TEESimulator)
 
@@ -123,7 +123,7 @@
 更换模块比如[TEESimulator](https://github.com/JingMatrix/TEESimulator)
 
 >尝试2
-把/data/adb/Tricky store/security_patch.txt文件删除
+把/data/adb/TrickyStore/security_patch.txt文件删除
 
 ## TEE伪造
 > 使用TEESimulator(RS)模块解决，使用证书链生成模式。
@@ -148,14 +148,14 @@
 > 检测到SU二进制文件（检测到ROOT）
 
 ## Miscellaneous Check（a）
-> 检测到dex2at（通常是LSP的问题，更换/更新LSP模块）
+> 检测到dex2oat（通常是LSP的问题，更换/更新LSP模块）
 
 ## Mount loophole
 > Magic Mount对系统修改模块挂载生效
 > 
-> 但挂载需要其他模块来隐藏(可选择susfs/zygisk next)
+> 但挂载需要其他模块来隐藏（可选择SusFS/ZygiskNext）
 > 
-> 使用zygisk next的排除策略>仅还原挂载
+> 使用ZygiskNext的排除策略>仅还原挂载
 > 
 > 并配置排除列表/开启默认卸载模块
 > 
@@ -166,7 +166,7 @@
 > 
 > 请尝试排除某些针对系统修改的模块
 > 
-> 使用某些模块隐藏这个问题（比如zygisk next中的排除策略）
+> 使用某些模块隐藏这个问题（比如ZygiskNext中的排除策略）
 
 ## [Hook] Suspicious library injection
 (zygisk/riru/xposed)
@@ -181,7 +181,7 @@
 > 
 > 检测原理请参考[此文档](/File/Doc/ksu_kp_sidechannel_zh.md)
 >
-> 解决办法（KernelSU系）：更新你的KenrelSU管理器并重新修补（LKM工作模式）或重新集成（GKI和Non-GKI工作模式）
+> 解决办法（KernelSU系）：更新你的KernelSU管理器并重新修补（LKM工作模式）或重新集成（GKI和Non-GKI工作模式）
 > 
 > 解决办法（APatch系）：
 > 1. 安装[nohello kpm](/File/Bin/Nohello-v1.8.2.9-83-b3e7d87-release.kpm)，并将检测器加入到排除列表，nohello可以在kernelpatach判断cmd值之前判断发起鉴权请求的应用是否在排除列表内，如果是，则禁止鉴权。
@@ -195,7 +195,7 @@
 > 
 > APatch的排除修改对检测器开启后会出现此问题？
 
-## KnelsU loop device
+## KernelSU loop device
 > 检测到KSU
 > 
 > 更新你的管理器并重新修补
@@ -229,12 +229,12 @@
 ## Zygisk detected
 > 检测到Zygisk,通常是magisk自带的zygisk导致（关闭解决）或者其他原因
 > 
-> 更新[zygisk next模块](http://github.com/Dr-TSNG/ZygiskNext)
+> 更新[ZygiskNext模块](http://github.com/Dr-TSNG/ZygiskNext)
 
 ## Tampered kernel
-> 内核信息校验异常(内核字符版本，内核构建时间)
+> 内核信息校验异常（内核字符版本，内核构建时间）
 > 
-> 尝试使用SUSFS隐藏或者还原未修改的boot.img
+> 尝试使用SusFS隐藏或者还原未修改的boot.img
 
 ## [hook]Resetprop modified
 > resetprop被修改
@@ -248,8 +248,8 @@
 ## Suspicious Surroundings（b）
 > 路径/data/local/tmp 文件夹的inode值高于10000
 
-解决方案: 将设备恢复出厂设置 / 使用SUSFS对路径伪装inode值小于1000 / 尝试使用[Inode-Hijacker](https://github.com/YiJieqwq/Inode-Hijacker/releases)脚本解决
-注意:此操作或会导致有线投屏功能失效
+解决方案: 将设备恢复出厂设置 / 使用SusFS对路径伪装inode值小于1000 / 尝试使用[Inode-Hijacker](https://github.com/YiJieqwq/Inode-Hijacker/releases)脚本解决
+如遇到有线投屏（如Scrcpy）不可用，使用 su -c restorecon -RF /data/local/tmp 解决问题
 
 ## Suspicious Surroundings（c）
 > /data/local/tmp 的权限被修改（默认771）
@@ -261,7 +261,7 @@
 > 
 > /data/local/tmp文件夹tmp的时间被修改
 > 
-> 格式化系统或者把tmp文件夹删除重启后变上方abc再使用sukisu中的Kstat配置（需要内核集成susfs）添加/data/local/tmp目录只修改ino值比如7365（tmp目录权限保持771，所有者为shell。
+> 格式化系统或者把tmp文件夹删除重启后变上方abc再使用sukisu中的Kstat配置（需要内核集成SusFS）添加/data/local/tmp目录只修改ino值比如7365（tmp目录权限保持771，所有者为shell。
 
 ## Miscellaneous Check(2)
 > 检测设备篡改/机型篡改
@@ -284,7 +284,7 @@ data 隔离？
 > 目录/data/local/tmp拒绝访问,文件夹权限设置问题?文件夹不存在?
 
 ## 伪装内核
-> 无效的使用susfs伪装内核
+> 无效的使用SusFS伪装内核
 > 
 > 伪装内核启动阶段选择post-fs-data
 
@@ -350,16 +350,16 @@ data 隔离？
 > 
 > 通过审计日志漏洞读取(avc)
 > 
-> 可使用SUSFS的功能或者使用ZN-AuditPatch模块
+> 可使用SusFS的功能或者使用ZN-AuditPatch模块
 > 
-> Android安全更新25/09/01已修复(不准确但结果是这样的)
+> Android安全更新25/09/01已修复（不准确但结果是这样的）
 
 ## 异常进程
 > 检测隐藏的进程组
 > 
 > 在系统设置中随便开一个软件分身尝试解决
 
-## 异常进程0000(pid）
+## 异常进程0000（pid）
 > 0000代表的是进程的pid
 > 
 > 你可以尝试使用shell指令以root执行“ps -ef | grep 数字id”来查找对应pid进程,通常是拥有root权限的守护进程（如lspd进程、Tricky-Store进程）
@@ -368,7 +368,7 @@ data 隔离？
 
 > 会有误报现象
 
-## MT管理器(MT2文件夹)/异常文件
+## MT管理器（MT2文件夹）/异常文件
 > 异常文件：检测到根目录下的“mt2”文件夹与boot.img/“.xml”异常文件。
 > 
 > “mt2”可在MT管理器设置中对MT2路径自定义修改解决（记得删除旧文件夹）
@@ -419,10 +419,10 @@ data 隔离？
 
 > 尝试更换[TEESimulator-RS模块](https://github.com/Enginex0/TEESimulator-RS)
 
-## 密钥篡改（q)
+## 密钥篡改（q）
 > 未知
 
-## 密钥篡改（b)
+## 密钥篡改（b）
 > 未知
 
 ## 证书已被吊销(CRL)
@@ -474,6 +474,6 @@ data 隔离？
      ```
 
 ## Magic Mount
-> 使用zygisk next的排除策略>仅还原挂载
+> 使用ZygiskNext的排除策略>仅还原挂载
 > 并配置排除列表/开启默认卸载模块
 > 对其隐藏

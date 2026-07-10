@@ -7,8 +7,8 @@
 Open an issue with your module list and which Xposed modules you're using, etc. I'll reply/help when I have time.
 
 # Miscellaneous Check(12)
-> LSPosed leaking Zygisk detection point.
-> Try uninstalling LSPosed / switching to ReZygisk / waiting for module updates.
+> Heuristic detection of Zygisk implementations (especially Zygisk-Next) via smaps scanning. However, the current implementation has issues that render the detection ineffective.
+> Please ignore this item until the detection method is fixed or removed.
 
 # Looper fd Graph Anomaly
 > Under analysis for reproduction, to be supplemented...
@@ -16,7 +16,7 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 # HMA Possibly Present
 > Suspected detection of old Scene_Hide-eBPF module behavior (cannot detect Scene app, but detects related services).
 > 
-> [Branch project / Pull update to rebuild module and flash](https://github.com/Andrea-lyz/Scene-Port-Hider-by-eBPF)
+> [Branch project / Pull update to rebuild module and flash / Download from Releases](https://github.com/Andrea-lyz/Scene-Port-Hider-by-eBPF)
 
 # Module Modifying Chunqiu Detected
 > Occurs after using the IsolPolicy module; resolve by disabling scope or uninstalling the module.
@@ -24,10 +24,13 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 > It's not just modules — Magisk's hide features (e.g., SELinux modification hiding) can also trigger this. Try updating to the latest CI version of your root manager to resolve.
 
 # Suspicious SELinux Policy Detected / ROOT Detected
+> Detection method reference: https://github.com/LSPosed/DirtySepolicy
+> 
 > New SELinux feature detection (app zygote has access to `/sys/fs/selinux/access`).
+> 
 > **KSU users:** [Update KSU Manager](https://t.me/KernelSU_group/3234/482579), re-patch image, flash, reboot, then enable selinux_hide feature.
 
-> **APatch/FolkPatch users:** [Load/embed this kpm](https://t.me/APatch_nightly/118)
+> **APatch/FolkPatch users:** [Load/embed this kpm](https://github.com/Admirepowered/selinux_hook)
 
 > **Magisk:** ...try switching to a kernel-level manager.
 
@@ -54,7 +57,7 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 > Delete any folders/files with "sh" in their names under `/storage/emulated/0/`.
 
 ## zygote test (1)
-> Enable Zygisk Next's linker function and anonymous memory function to try resolving.
+> Enable ZygiskNext's linker function and anonymous memory function to try resolving.
 > Exclusion list strategy — Restore mount only.
 > Unstable detection, occasional occurrence.
 
@@ -66,10 +69,20 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 > [SoterService from Tencent](https://github.com/Tencent/soter)
 > Purpose: WeChat fingerprint payments, etc.
 
+> Detection method: Checks files to determine if Soter service programs exist and cross-validates with service point attribute status to determine if Soter key is blocked.
+> 1. Abnormal service point attributes + Soter program exists → Soter is blocked (Abnormal)
+> 2. Abnormal service point attributes + Soter program absent → This device natively does not support Soter (Normal)
+> 3. Normal service point attributes + Soter program exists → Device supports Soter (Normal)
+> 4. Normal service point attributes + Soter program absent → Impossible
+
 Solutions:
 
 > Wait for module updates (fixing SoterService is unlikely).
-> Use SUSFS to hide related service paths, and use HMA-OSS to hide the Soter system service app from the detector to try resolving.
+> Use SusFS or PathMask to hide related service paths, and use HMA-OSS to hide the Soter system service app from the detector to try resolving.
+
+Note: PathMask is not focused on environment hiding, use with caution.
+
+Principle: Currently we cannot technically simulate the Soter service, but we can hide Soter-related files to fake case #2.
 
 ## Tampered Attentionkey(X)
 > Carries 20+ types of anomaly tags (mostly OEM-specific). Targets TEE's handling of anomaly tag feedback against expected values.
@@ -99,14 +112,14 @@ Solutions:
 ## Found property
 Execute [this sh script](https://github.com/mingzun09/Chunqiu-Detector-Problem-solution/blob/main/File/Found%20property.sh) to try resolving.
 
-## Tricky store Hook/2
+## TrickyStore Hook/2
 > Timing side-channel (unstable). May disappear on re-open.
 > Replace with [TEESimulator](https://github.com/JingMatrix/TEESimulator) module.
 
 ## Found TrickyStore/Similar Module
 > Attempt 1: Replace with [TEESimulator](https://github.com/JingMatrix/TEESimulator).
 
-> Attempt 2: Delete `/data/adb/Tricky store/security_patch.txt`.
+> Attempt 2: Delete `/data/adb/TrickyStore/security_patch.txt`.
 
 ## TEE Spoofing
 > Use the TEESimulator(RS) module with certificate chain generation mode to resolve.
@@ -131,14 +144,14 @@ Execute [this sh script](https://github.com/mingzun09/Chunqiu-Detector-Problem-s
 > SU binary detected (ROOT detected).
 
 ## Miscellaneous Check (a)
-> dex2at detected (Usually an LSP issue; replace/update the LSP module).
+> dex2oat detected (Usually an LSP issue; replace/update the LSP module).
 
 ## Mount loophole
 > Magic Mount takes effect for system modification module mounts.
 > 
-> Mounting needs to be hidden by other modules (susfs/zygisk next).
+> Mounting needs to be hidden by other modules (SusFS/ZygiskNext).
 > 
-> Use Zygisk Next's exclusion strategy > Restore mount only.
+> Use ZygiskNext's exclusion strategy > Restore mount only.
 > 
 > Configure the exclusion list / enable default module unmounting.
 > 
@@ -149,7 +162,7 @@ Execute [this sh script](https://github.com/mingzun09/Chunqiu-Detector-Problem-s
 > 
 > Try excluding certain system-modifying modules.
 > 
-> Use certain modules to hide this issue (e.g., Zygisk Next's exclusion strategy).
+> Use certain modules to hide this issue (e.g., ZygiskNext's exclusion strategy).
 
 ## [Hook] Suspicious library injection
 (zygisk/riru/xposed)
@@ -161,9 +174,15 @@ HOOK detected. Troubleshoot the cause yourself — too many possible factors.
 > Unstable, appears occasionally (more common with KSU LKM mode).
 
 ## Abnormal Environment
-> KSU/APatch/Magisk detected.
+> Detects KSU/APatch (side-channel detection).
 > 
-> Side-channel detection. Update your root manager and re-patch.
+> Detection principle reference: [this document](/File/Doc/ksu_kp_sidechannel_zh.md)
+>
+> Solution (KernelSU): Update your KernelSU Manager and re-patch (LKM work mode) or re-integrate (GKI and Non-GKI work mode).
+> 
+> Solution (APatch):
+> 1. Install [nohello kpm](/File/Bin/Nohello-v1.8.2.9-83-b3e7d87-release.kpm), and add the detector to the exclusion list. Nohello can check whether the app initiating the authentication request is in the exclusion list before kernelpatch evaluates the cmd value, and if so, deny the authentication.
+> 2. Future versions of APatch will introduce signature-based authentication, directly rejecting authentication requests from apps whose signatures do not match. This is not fully implemented yet and requires some waiting.
 
 ## Abnormal Environment (04)
 > New version changed to function call detection (unstable?).
@@ -205,12 +224,12 @@ HOOK detected. Troubleshoot the cause yourself — too many possible factors.
 ## Zygisk detected
 > Zygisk detected — usually Magisk's built-in Zygisk (disable it) or other causes.
 > 
-> Update the [Zygisk Next module](http://github.com/Dr-TSNG/ZygiskNext).
+> Update the [ZygiskNext module](http://github.com/Dr-TSNG/ZygiskNext).
 
 ## Tampered kernel
 > Kernel information checksum abnormal (kernel version string, kernel build time).
 > 
-> Try using SUSFS to hide it or restore the unmodified boot.img.
+> Try using SusFS to hide it or restore the unmodified boot.img.
 
 ## [hook] Resetprop modified
 > resetprop has been modified.
@@ -224,8 +243,8 @@ Solution: Change group to shell.
 ## Suspicious Surroundings (b)
 > Path: `/data/local/tmp` folder's inode value > 10000.
 
-Solutions: Factory reset the device / Use SUSFS to spoof inode value < 1000 / Try using the [Inode-Hijacker](https://github.com/YiJieqwq/Inode-Hijacker/releases) script to resolve.
-Note: This operation may cause wired display projection to fail.
+Solutions: Factory reset the device / Use SusFS to spoof inode value < 1000 / Try using the [Inode-Hijacker](https://github.com/YiJieqwq/Inode-Hijacker/releases) script to resolve.
+If wired display projection (e.g. Scrcpy) becomes unavailable, use `su -c restorecon -RF /data/local/tmp` to resolve.
 
 ## Suspicious Surroundings (c)
 > `/data/local/tmp` — permissions modified (default is 771).
@@ -237,7 +256,7 @@ Solution: Reset permissions.
 > 
 > The timestamp of `/data/local/tmp` has been modified.
 > 
-> Format the system, or delete the `tmp` folder and reboot (this reverts to states a/b/c above), then use sukisu's Kstat config (requires kernel-integrated SUSFS) to add `/data/local/tmp` with a modified inode value (e.g., 7365). Keep `tmp` permissions at 771 and owner as shell.
+> Format the system, or delete the `tmp` folder and reboot (this reverts to states a/b/c above), then use sukisu's Kstat config (requires kernel-integrated SusFS) to add `/data/local/tmp` with a modified inode value (e.g., 7365). Keep `tmp` permissions at 771 and owner as shell.
 
 ## Miscellaneous Check (2)
 > Device tampering / model modification detected.
@@ -259,7 +278,7 @@ Solution: Reset permissions.
 > Access to `/data/local/tmp` denied. Permission issue? Folder doesn't exist?
 
 ## Spoofed Kernel
-> Ineffective use of SUSFS to spoof the kernel.
+> Ineffective use of SusFS to spoof the kernel.
 > 
 > Select `post-fs-data` during the kernel spoofing startup phase.
 
@@ -271,9 +290,20 @@ Solution: Reset permissions.
 > Try replacing the "meta-module" to resolve.
 
 ## Mount Gap
-> Mount abnormality detected.
+> Determines whether root hiding behavior exists by checking mount group IDs.
 > 
-> Try replacing the "meta-module" or updating the root manager.
+> In this method, when mount group IDs grow discontinuously (e.g., 1,2,3,6,7,8...), it is determined that root hiding behavior exists. Conversely, when mount group IDs grow continuously (e.g., 1,2,3,4,5,6,7...), it is normal.
+>
+> This phenomenon occurs when Magisk switches namespace. For KernelSU/APatch, it may also occur if certain modules with bind mount functionality are used.
+> 
+> Solutions:
+> Magisk: Use Magisk Alpha to resolve, principle unknown.
+> 
+> KernelSU/APatch: Try replacing the "meta-module" or updating the root manager.
+>
+> If the problem persists, check system modules with bind mount functionality, and whether the system natively exhibits this phenomenon.
+
+Note: A small number of ROMs natively exhibit this phenomenon. If this is the case, please ignore this item.
 
 ## 2222
 > Mount abnormality detected.
@@ -314,7 +344,7 @@ Solution: Reset permissions.
 > 
 > Read via audit log vulnerability (avc).
 > 
-> Use SUSFS features or the ZN-AuditPatch module.
+> Use SusFS features or the ZN-AuditPatch module.
 > 
 > Fixed in Android security update 2025/09/01 (not entirely accurate, but that's the observation).
 
@@ -326,9 +356,9 @@ Solution: Reset permissions.
 ## Abnormal Process 0000 (pid)
 > 0000 represents the process PID.
 > 
-> You can run `ps -ef | grep <pid>` as root to identify the process (often an LSPosed process).
+> You can run `ps -ef | grep <pid>` as root to identify the process (often a root-privileged daemon, e.g., lspd, Tricky-Store process).
 > 
-> You can also enable an app clone in system settings to resolve.
+> Solution: This detection relies on a security vulnerability. Updating the security patch to 2026-01-01 can significantly reduce the detection rate, but it cannot be fully resolved at present. This security vulnerability will be completely fixed after Google officially releases Android 17.
 > 
 > False positives may occur.
 
@@ -439,5 +469,5 @@ Configure `target.txt` in `/data/adb/tricky_store/` by adding the app package na
      ```
 
 ## Magic Mount
-> Use Zygisk Next's exclusion strategy > Restore mount only.
+> Use ZygiskNext's exclusion strategy > Restore mount only.
 > Configure the exclusion list / enable default module unmounting to hide it.
