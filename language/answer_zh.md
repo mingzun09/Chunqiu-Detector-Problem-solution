@@ -71,11 +71,11 @@
 > 来自Tencent的[SoterService](https://github.com/Tencent/soter)
 > 作用: 微信的指纹支付等。
 
- > 通过比对Soter服务与Soter服务相关文件的存在一致性来判定是否存在Soterkey被屏蔽的情况。
-> 1. Soter服务不存在且Soter相关文件存在 -> Soter被屏蔽 （异常）
-> 2. Soter服务不存在且Soter相关文件不存在 -> 此设备原生不支持Soter服务 （正常）
-> 3. Soter服务正常且Soter相关文件存在 -> 此设备支持Soter （正常）
-> 4. Soter服务正常且Soter相关文件不存在 -> 不可能
+ > 通过检查文件来判断是否存在Soter服务程序以及判断其服务点属性状态来交叉验证是否存在Soterkey被屏蔽的情况。
+> 1. 服务点属性状态异常 + Soter服务程序存在 -> Soter被屏蔽 （异常）
+> 2. 服务点属性状态异常 + Soter服务程序不存在 -> 此设备原生不支持Soter服务 （正常）
+> 3. 服务点属性状态正常 + Soter服务程序存在 -> 此设备支持Soter （正常）
+> 4. 服务点属性状态正常 + Soter服务程序不存在 -> 不可能
 
 解决方法:
 
@@ -179,29 +179,11 @@
 ## Abnormal Environment
 > 检测到KSU/APatch（侧信道检测）
 > 
-KernelSU检测原理：
-KernelSU框架会使用Kprobe来hook newfsatat和faccessat系统调用接口，这使得调用两者所花费时间显著变长，但statx不受影响，而且在正常情况下，newfsatat和statx所花时间非常接近。
-检测方法：多次测量调用newfsatat和statx所花费的时间，取其总和来让比值趋于稳定，两者所花总时间的比值大于1.2时则判定存在KernelSU。
-
-> 解决办法：更新你的KenrelSU管理器并重新修补（LKM工作模式）或重新集成（GKI和Non-GKI工作模式）
-
-APatch检测原理：
-建议参照[此代码](https://github.com/bmax121/KernelPatch/blob/352de3747693d403eb1a4bd2c98dc04aeb01955a/kernel/patch/common/supercall.c)阅读
-
-APatch管理器在向kernelpatch框架发起鉴权请求时，kernelpatch会读取APatch管理器所提供的superkey的所在地址（从before函数的udata参数传入）；kernelpatch在鉴权前会验证cmd值是否在范围内，在此范围内则允许鉴权，反之不允许。
-
-检测方法：
-1. “懒分配”页探测
-
-检测器先向系统申请一个“懒分配”页，将此“懒分配”页的所在地址当作superkey所在地址向kernelpatch发起鉴权请求，kernelpatch会解引用此地址，尝试从中读取所谓的“superkey”，但实际上“懒分配”页中不存在于superkey，而由于kernelpatch尝试读取该页，系统会自动将“懒分配”页映射到一个物理内存块，此时检测器检查此页是否被映射到物理内存块，如果被映射即可判定存在kernelpatch，反之说明kernelpatch不存在。
-
-2. 鉴权时延探测
-
-kernelpatch在尝试读取superkey之前有一个检查cmd值的步骤，如果cmd值在范围内（SUPERCALL_HELLO和SUPERCALL_MAX之间）将会走向读取和验证superkey，反之会快速返回结束鉴权，这两种走向的花费时间是不同的，检测器可以提前拟定一个在范围内的cmd值和不在范围内的cmd值，分别向kernelpatch发起鉴权请求，同样的，多次测量范围内cmd和范围外cmd所花费的时间，取其总和来让比值趋于稳定，如果比值大于2，则判定kernelpatch存在。
-
-懒分配：当用户态程序向操作系统请求分配页时，操作系统为了节省物理内存空间，会在虚拟内存分配该页，但不映射物理内存块，直到此页被真正访问后才会实质上分配内存块。
-
-> 解决办法：
+> 检测原理请参考[此文档](/File/Doc/ksu_kp_sidechannel_zh.md)
+>
+> 解决办法（KernelSU系）：更新你的KenrelSU管理器并重新修补（LKM工作模式）或重新集成（GKI和Non-GKI工作模式）
+> 
+> 解决办法（APatch系）：
 > 1. 安装nohello kpm，并将检测器加入到排除列表，nohello可以在kernelpatach判断cmd值之前判断发起鉴权请求的应用是否在排除列表内，如果是，则禁止鉴权。
 > 2. 未来版本的APatch会引入基于签名的鉴权方法，对于不符合签名却发起了鉴权的应用直接拒绝鉴权请求。目前没有完全实现，需要再等一段时间。
 
@@ -317,13 +299,17 @@ data 隔离？
 > 通过检查挂载组ID来判断是否存在隐藏root行为。
 > 
 > 在此判断方法中，当挂载组ID增长不连续时（例如1,2,3,6,7,8...）判定为存在隐藏root行为，反之，当挂载组ID增长连续（例如1,2,3,4,5,6,7...）则正常。
+>
+> 当Magisk系切换namespace时将出现此现象，而对于KernelSU系/APatch系，如果使用了某些具有绑定挂载功能的模块也可能出现此现象。
 > 
 > 解决办法：
 > Magisk系：使用Magisk Alpha可解决，原理未知。
 > 
 > Kernel系/APatch系：尝试更换"元模块"解决或者更新ROOT管理器
+>
+> 如果问题仍存在，请检查具有绑定挂载功能的系统模块，以及系统是否原生存在此现象。
 
-在少数ROM中原生存在此现象，如果属于这种情况 请忽略此条目
+注意：在少数ROM中原生存在此现象，如果属于这种情况 请忽略此条目
 
 ## 2222
 > 检测挂载异常
@@ -378,7 +364,7 @@ data 隔离？
 > 
 > 你可以尝试使用shell指令以root执行“ps -ef | grep 数字id”来查找对应pid进程,通常是拥有root权限的守护进程（如lspd进程、Tricky-Store进程）
 > 
-> 解决办法：此检测依赖安全漏洞，更新安全补丁到2026-01-01可显著降低检出率，但目前无法完全解决，等待Google在将来推出更新的安全补丁可完全解决此问题。
+> 解决办法：此检测依赖安全漏洞，更新安全补丁到2026-01-01可显著降低检出率，但目前无法完全解决，此安全漏洞将在Google正式发布Android 17后完全修复。
 
 > 会有误报现象
 
