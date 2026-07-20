@@ -30,9 +30,17 @@
 > 
 > KSU使用者[更新KSU管理器](https://t.me/KernelSU_group/3234/482579)并重新修补镜像并刷入后重启再开启selinux_hide功能解决
 
-> APatch/FolkPatch使用者[加载/嵌入此kpm](https://github.com/Admirepowered/selinux_hook)
+> APatch/FolkPatch使用者[使用此kpm](https://github.com/Admirepowered/selinux_hook)
+
+> selinux_hook模块使用说明
+> 1. 内核版本4.19-6.12的设备，必须嵌入此模块才能生效，如果使用加载模式，则不会启用任何伪装方法。
+> 注意：由于编译优化导致的机器指令与预期不符，6.12内核设备请慎重嵌入此模块，会有很大概率导致kernelpanic，此问题后续将会被解决。
+> 2. 内核版本4.14的设备，建议嵌入模块，但由于模拟context_struct_compute_av存在风险，在嵌入模块前请备份原boot.img，以便在出现kernelpanic后可救砖；加载模式同样可生效，但会使用基于关键词过滤的备选方法，效果相对较差，如果设备的policy中包含了模块没有收录的且能被证明异常的关键词，则会发生泄露。
+> 3. 内核版本4.9的设备，不论是嵌入还是加载，模块都会使用基于关键词过滤的备选方法，效果相同。
 
 > Magisk......尝试更换内核级管理器
+> 
+> 在将来Magisk可能会合并保存Clean policy blob功能，如果合并此功能，Magisk将有机会通过此检测。
 
 # fdinfo mnt 采样异常（c）
 > 大概率为检测到USB调试痕迹，小概率误报。可使用脚本[调试痕迹消除](https://github.com/YiJieqwq/ADB-Trace-Cleaner/releases)尝试解决
@@ -131,7 +139,7 @@
 ## Property Modified（数字代表几处属性修改）
 > 原理是查属性区空洞，如果说有存在空洞的话，说明存在属性修改。
 
-> 隐藏被修改的属性可将shamiko模块中的[shamiko_Plus.sh](https://github.com/mingzun09/Chunqiu-Detector-Problem-solution/blob/main/File/shamiko_Plus.sh)文件添加并移动到/data/adb/service.d/目录下并重启，尝试解决。
+> 隐藏被修改的属性可将shamiko模块中的[shamiko_Plus.sh](https://github.com/mingzun09/Chunqiu-Detector-Problem-solution/blob/main/File/shamiko_Plus.sh)文件添加并移动到/data/adb/service.d/目录下，确认该脚本有执行权限后重启，尝试解决。
 
 ## 环境存疑1（实验性检测）
 > 在HMA-OSS中对检测器开启黑名单模式隐藏后，若勾选了设置预设中的“输入法”选项后，此检测项就会出现？
@@ -184,16 +192,13 @@
 > 解决办法（KernelSU系）：更新你的KernelSU管理器并重新修补（LKM工作模式）或重新集成（GKI和Non-GKI工作模式）
 > 
 > 解决办法（APatch系）：
-> 1. 安装[nohello kpm](/File/Bin/Nohello-v1.8.2.9-83-b3e7d87-release.kpm)，并将检测器加入到排除列表，nohello可以在kernelpatach判断cmd值之前判断发起鉴权请求的应用是否在排除列表内，如果是，则禁止鉴权。
+> 1. 嵌入/加载[nohello kpm](/File/Bin/Nohello-v1.8.2.9-83-b3e7d87-release.kpm)，并将检测器加入到排除列表，nohello可以在kernelpatach判断cmd值之前判断发起鉴权请求的应用是否在排除列表内，如果是，则禁止鉴权。
 > 2. 未来版本的APatch会引入基于签名的鉴权方法，对于不符合签名却发起了鉴权的应用直接拒绝鉴权请求。目前没有完全实现，需要再等一段时间。
-
-
-## Abnormal Environment(04)
-> 新版更改为函数调用检测（不稳定？）
 > 
-> 等待ROOT管理器/模块更新？
+> 解决办法（KPatch-Next）：更新KPatch-Next驱动到0.13.5-2
 > 
-> APatch的排除修改对检测器开启后会出现此问题？
+> 原理：旧版KPatch-Next完全继承了KernelPatch的鉴权方式，所以在APatch上可行的测信道检测方法在旧版KPatch-Next上也同样可行；但最新版KPatch-Next以判断用户态kpatch-android组件的uid实现鉴权，不再会被测信道检测。
+
 
 ## KernelSU loop device
 > 检测到KSU
@@ -354,17 +359,16 @@ data 隔离？
 > 
 > Android安全更新25/09/01已修复（不准确但结果是这样的）
 
-## 异常进程
-> 检测隐藏的进程组
-> 
-> 在系统设置中随便开一个软件分身尝试解决
-
 ## 异常进程0000（pid）
 > 0000代表的是进程的pid
 > 
 > 你可以尝试使用shell指令以root执行“ps -ef | grep 数字id”来查找对应pid进程,通常是拥有root权限的守护进程（如lspd进程、Tricky-Store进程）
 > 
 > 解决办法：此检测依赖安全漏洞，更新安全补丁到2026-01-01可显著降低检出率，但目前无法完全解决，此安全漏洞将在Google正式发布Android 17后完全修复。
+> 
+> 安全补丁更新往往伴随系统更新，如果因为不想更新系统而无法更新安全补丁，可以忽略此条目。
+> 
+> 双开应用有时可以使此检测方案失效，但不会实质上解决此安全漏洞，所以双开应用不应被视为可行的方法。
 
 > 会有误报现象
 
@@ -374,9 +378,9 @@ data 隔离？
 > “mt2”可在MT管理器设置中对MT2路径自定义修改解决（记得删除旧文件夹）
 
 ## Risk apps‘软件包名’
-> 检测风险应用>软件包名
+> 通过Unicode零宽字符漏洞检查/storage/emulated/0/Android/data/中的风险应用包名
 > 
-> 安装[Unicode零宽修复模块](https://t.me/real5ec1cff/268)对/storage/emulated/0/Android/data/目录修复可被读取问题并搭配HMA-OSS对风险应用隐藏。
+> 安装[Unicode零宽修复模块](https://github.com/5ec1cff/FuseFixer)对/storage/emulated/0/Android/data/目录修复可被读取问题并搭配HMA-OSS对风险应用隐藏。
 
 ## Thanox service detected
 > 检测到Thanox服务
