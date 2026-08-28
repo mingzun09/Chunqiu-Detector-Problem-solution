@@ -77,17 +77,98 @@
     }
 
     @media screen and (max-width: 768px) {
+      body .content {
+        padding-top: 100px !important;
+      }
+
+      .app-nav {
+        position: absolute;
+        top: 12px;
+        right: 55px;
+        left: 15px;
+        text-align: center;
+      }
+
+      .app-nav ul {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: 6px 12px;
+        margin: 0;
+        padding: 0;
+      }
+
+      .app-nav li {
+        margin: 0 !important;
+        display: inline-flex !important;
+        align-items: center;
+      }
+
       .app-nav li.nav-search-item {
-        margin: 5px 0;
-        display: block;
+        width: 100%;
+        justify-content: center;
+        margin-bottom: 4px !important;
       }
+
       .app-nav li.nav-search-item .nav-search-input {
-        width: 100%;
-        max-width: 200px;
+        width: 90% !important;
+        max-width: 280px !important;
+        box-sizing: border-box;
       }
+
       .app-nav li.nav-search-item .nav-search-input:focus {
-        width: 100%;
-        max-width: 220px;
+        width: 95% !important;
+        max-width: 300px !important;
+      }
+    }
+
+    /* Details smooth animation & styling */
+    details {
+      border: 1px solid #e8e8e8;
+      border-radius: 6px;
+      padding: 10px 14px;
+      margin: 12px 0;
+      background-color: #fafafa;
+      transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    details[open] {
+      background-color: #fff;
+      border-color: #42b983;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    details summary {
+      cursor: pointer;
+      font-weight: 600;
+      color: #2c3e50;
+      outline: none;
+      transition: color 0.2s ease;
+    }
+
+    details summary:hover {
+      color: #42b983;
+    }
+
+    details[open] summary {
+      margin-bottom: 10px;
+      border-bottom: 1px dashed #e8e8e8;
+      padding-bottom: 8px;
+    }
+
+    details[open] > *:not(summary) {
+      animation: details-fade-in 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes details-fade-in {
+      from {
+        opacity: 0;
+        transform: translateY(-6px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
       }
     }
 
