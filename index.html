@@ -56,6 +56,7 @@
       display: inline-flex;
       align-items: center;
       vertical-align: middle;
+      position: relative;
     }
 
     .app-nav li.nav-search-item .nav-search-input {
@@ -74,6 +75,75 @@
       border-color: #42b983;
       box-shadow: 0 0 6px rgba(66, 185, 131, 0.4);
       width: 190px;
+    }
+
+    /* Floating dropdown search results panel */
+    .app-nav li.nav-search-item .nav-search-dropdown {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      width: 360px;
+      max-height: 420px;
+      overflow-y: auto;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+      display: none;
+      padding: 8px 0;
+      text-align: left;
+      font-size: 13px;
+      box-sizing: border-box;
+    }
+
+    .app-nav li.nav-search-item .nav-search-dropdown.show {
+      display: block;
+    }
+
+    .app-nav li.nav-search-item .nav-search-dropdown .matching-post {
+      padding: 10px 14px;
+      border-bottom: 1px solid #f1f5f9;
+      transition: background-color 0.2s ease;
+    }
+
+    .app-nav li.nav-search-item .nav-search-dropdown .matching-post:last-child {
+      border-bottom: none;
+    }
+
+    .app-nav li.nav-search-item .nav-search-dropdown .matching-post:hover {
+      background-color: #f8fafc;
+    }
+
+    .app-nav li.nav-search-item .nav-search-dropdown h2 {
+      font-size: 14px;
+      margin: 0 0 4px 0;
+      color: #42b983;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+
+    .app-nav li.nav-search-item .nav-search-dropdown p {
+      margin: 0;
+      color: #64748b;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .app-nav li.nav-search-item .nav-search-dropdown a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .app-nav li.nav-search-item .nav-search-dropdown .search-keyword {
+      color: #42b983;
+      font-weight: bold;
+    }
+
+    .app-nav li.nav-search-item .nav-search-dropdown .no-results {
+      padding: 12px 16px;
+      color: #94a3b8;
+      text-align: center;
     }
 
     @media screen and (max-width: 768px) {
@@ -120,6 +190,14 @@
       .app-nav li.nav-search-item .nav-search-input:focus {
         width: 95% !important;
         max-width: 300px !important;
+      }
+
+      .app-nav li.nav-search-item .nav-search-dropdown {
+        left: 5%;
+        right: 5%;
+        width: 90%;
+        max-width: 320px;
+        margin: 0 auto;
       }
     }
 
@@ -203,6 +281,30 @@
         navInput.placeholder = isEnglish ? 'Search...' : '搜索...';
       }
 
+      function syncSearchResultsToDropdown() {
+        const dropdown = document.querySelector('.nav-search-dropdown');
+        const sidebarResults = document.querySelector('.sidebar .search .results-panel');
+        if (!dropdown) return;
+
+        if (sidebarResults) {
+          dropdown.innerHTML = sidebarResults.innerHTML;
+        } else {
+          dropdown.innerHTML = '';
+        }
+      }
+
+      function showDropdownIfNotEmpty() {
+        const dropdown = document.querySelector('.nav-search-dropdown');
+        const query = getSearchQuery();
+        if (dropdown) {
+          if (query.length > 0) {
+            dropdown.classList.add('show');
+          } else {
+            dropdown.classList.remove('show');
+          }
+        }
+      }
+
       function injectNavbarSearch() {
         const navUl = document.querySelector('.app-nav ul');
         if (!navUl) return;
@@ -217,7 +319,11 @@
           input.className = 'nav-search-input';
           input.ariaLabel = 'Search text';
 
+          const dropdown = document.createElement('div');
+          dropdown.className = 'nav-search-dropdown';
+
           li.appendChild(input);
+          li.appendChild(dropdown);
 
           // Sync input events to sidebar search
           input.addEventListener('input', function (e) {
@@ -228,6 +334,13 @@
               sidebarInput.value = val;
               sidebarInput.dispatchEvent(new Event('input', { bubbles: true }));
             }
+            syncSearchResultsToDropdown();
+            showDropdownIfNotEmpty();
+          });
+
+          input.addEventListener('focus', function () {
+            syncSearchResultsToDropdown();
+            showDropdownIfNotEmpty();
           });
         }
 
@@ -237,6 +350,35 @@
 
         updateNavbarSearchPlaceholder();
       }
+
+      // Observe mutation in sidebar search results to sync live updates to floating dropdown
+      const searchObserver = new MutationObserver(function () {
+        syncSearchResultsToDropdown();
+        showDropdownIfNotEmpty();
+      });
+
+      function setupSearchObserver() {
+        const sidebarSearch = document.querySelector('.sidebar .search');
+        if (sidebarSearch) {
+          searchObserver.observe(sidebarSearch, { childList: true, subtree: true });
+        }
+      }
+
+      // Close dropdown when clicking outside or pressing Escape
+      document.addEventListener('click', function (e) {
+        const navSearchItem = document.querySelector('.nav-search-item');
+        const dropdown = document.querySelector('.nav-search-dropdown');
+        if (dropdown && navSearchItem && !navSearchItem.contains(e.target)) {
+          dropdown.classList.remove('show');
+        }
+      });
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+          const dropdown = document.querySelector('.nav-search-dropdown');
+          if (dropdown) dropdown.classList.remove('show');
+        }
+      });
 
       // Sync sidebar search back to navbar search
       document.addEventListener('input', function (e) {
@@ -317,6 +459,12 @@
 
           const query = getSearchQuery();
           expandAndScrollToMatch(headingId, query);
+
+          // Dismiss floating search dropdown after clicking a result
+          const dropdown = document.querySelector('.nav-search-dropdown');
+          if (dropdown) {
+            dropdown.classList.remove('show');
+          }
         }
       });
 
@@ -325,6 +473,7 @@
       window.$docsify.plugins = (window.$docsify.plugins || []).concat(function (hook) {
         hook.doneEach(function () {
           injectNavbarSearch();
+          setupSearchObserver();
         });
       });
 
