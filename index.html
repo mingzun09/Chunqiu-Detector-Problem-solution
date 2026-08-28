@@ -48,5 +48,208 @@
   <script src="//cdn.jsdelivr.net/npm/docsify@4/lib/plugins/search.min.js"></script>
   <!-- Copy code plugin -->
   <script src="//cdn.jsdelivr.net/npm/docsify-copy-code/dist/docsify-copy-code.min.js"></script>
+
+  <style>
+    /* Navbar search styling */
+    .app-nav li.nav-search-item {
+      margin: 0 10px;
+      display: inline-flex;
+      align-items: center;
+      vertical-align: middle;
+    }
+
+    .app-nav li.nav-search-item .nav-search-input {
+      padding: 5px 12px;
+      border: 1px solid #ccc;
+      border-radius: 15px;
+      outline: none;
+      font-size: 13px;
+      width: 150px;
+      transition: all 0.3s ease;
+      background: #fff;
+      color: #333;
+    }
+
+    .app-nav li.nav-search-item .nav-search-input:focus {
+      border-color: #42b983;
+      box-shadow: 0 0 6px rgba(66, 185, 131, 0.4);
+      width: 190px;
+    }
+
+    @media screen and (max-width: 768px) {
+      .app-nav li.nav-search-item {
+        margin: 5px 0;
+        display: block;
+      }
+      .app-nav li.nav-search-item .nav-search-input {
+        width: 100%;
+        max-width: 200px;
+      }
+      .app-nav li.nav-search-item .nav-search-input:focus {
+        width: 100%;
+        max-width: 220px;
+      }
+    }
+
+    /* Highlight matching details on search navigation */
+    details.search-highlight {
+      animation: highlight-pulse 2s ease-in-out;
+      border-left: 4px solid #42b983;
+      padding-left: 8px;
+    }
+
+    @keyframes highlight-pulse {
+      0% { background-color: rgba(66, 185, 131, 0.25); }
+      50% { background-color: rgba(66, 185, 131, 0.15); }
+      100% { background-color: transparent; }
+    }
+  </style>
+
+  <script>
+    (function () {
+      let lastSearchQuery = '';
+
+      function getSearchQuery() {
+        const navInput = document.querySelector('.nav-search-input');
+        const sidebarInput = document.querySelector('.sidebar .search input[type="search"]');
+        return (navInput && navInput.value.trim()) || (sidebarInput && sidebarInput.value.trim()) || lastSearchQuery;
+      }
+
+      function updateNavbarSearchPlaceholder() {
+        const navInput = document.querySelector('.nav-search-input');
+        if (!navInput) return;
+        const isEnglish = window.location.hash.includes('answer_en');
+        navInput.placeholder = isEnglish ? 'Search...' : '搜索...';
+      }
+
+      function injectNavbarSearch() {
+        const navUl = document.querySelector('.app-nav ul');
+        if (!navUl) return;
+
+        let li = navUl.querySelector('.nav-search-item');
+        if (!li) {
+          li = document.createElement('li');
+          li.className = 'nav-search-item';
+
+          const input = document.createElement('input');
+          input.type = 'search';
+          input.className = 'nav-search-input';
+          input.ariaLabel = 'Search text';
+
+          li.appendChild(input);
+
+          // Sync input events to sidebar search
+          input.addEventListener('input', function (e) {
+            const val = e.target.value;
+            lastSearchQuery = val.trim();
+            const sidebarInput = document.querySelector('.sidebar .search input[type="search"]');
+            if (sidebarInput) {
+              sidebarInput.value = val;
+              sidebarInput.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+          });
+        }
+
+        if (navUl.firstChild !== li) {
+          navUl.insertBefore(li, navUl.firstChild);
+        }
+
+        updateNavbarSearchPlaceholder();
+      }
+
+      // Sync sidebar search back to navbar search
+      document.addEventListener('input', function (e) {
+        if (e.target && e.target.matches('.sidebar .search input[type="search"]')) {
+          const navInput = document.querySelector('.nav-search-input');
+          if (navInput && navInput.value !== e.target.value) {
+            navInput.value = e.target.value;
+          }
+          lastSearchQuery = e.target.value.trim();
+        }
+      });
+
+      function expandAndScrollToMatch(targetHeadingId, query) {
+        if (!query) return;
+
+        setTimeout(function () {
+          const queryLower = query.toLowerCase();
+          const allDetails = Array.from(document.querySelectorAll('article#main details'));
+          let matchedDetails = [];
+
+          // If a section heading target exists, prefer details in that section
+          if (targetHeadingId) {
+            const headingEl = document.getElementById(targetHeadingId);
+            if (headingEl) {
+              // Find details following this heading until next H1/H2
+              let curr = headingEl.nextElementSibling;
+              while (curr && !['H1', 'H2'].includes(curr.tagName)) {
+                if (curr.tagName === 'DETAILS') {
+                  const text = curr.textContent || curr.innerText || '';
+                  if (text.toLowerCase().includes(queryLower)) {
+                    matchedDetails.push(curr);
+                  }
+                }
+                curr = curr.nextElementSibling;
+              }
+            }
+          }
+
+          // Fallback: search across all details if no heading match found
+          if (matchedDetails.length === 0) {
+            matchedDetails = allDetails.filter(d => {
+              const text = d.textContent || d.innerText || '';
+              return text.toLowerCase().includes(queryLower);
+            });
+          }
+
+          if (matchedDetails.length > 0) {
+            // Expand all matched details
+            matchedDetails.forEach(d => {
+              d.open = true;
+            });
+
+            // Scroll to the first match
+            const firstMatch = matchedDetails[0];
+            firstMatch.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            // Highlight temporarily
+            firstMatch.classList.remove('search-highlight');
+            void firstMatch.offsetWidth; // trigger reflow
+            firstMatch.classList.add('search-highlight');
+          }
+        }, 150);
+      }
+
+      // Intercept clicks on search result items
+      document.addEventListener('click', function (e) {
+        const link = e.target.closest('.matching-post a');
+        if (link) {
+          const href = link.getAttribute('href') || '';
+          const hashIdx = href.indexOf('#');
+          const hashStr = hashIdx !== -1 ? href.substring(hashIdx) : href;
+
+          let headingId = '';
+          const queryMatch = hashStr.match(/\?id=([^&]+)/) || hashStr.match(/#.*[\?&]id=([^&]+)/);
+          if (queryMatch) {
+            headingId = decodeURIComponent(queryMatch[1]);
+          }
+
+          const query = getSearchQuery();
+          expandAndScrollToMatch(headingId, query);
+        }
+      });
+
+      // Docsify plugin hook for setup & route updates
+      window.$docsify = window.$docsify || {};
+      window.$docsify.plugins = (window.$docsify.plugins || []).concat(function (hook) {
+        hook.doneEach(function () {
+          injectNavbarSearch();
+        });
+      });
+
+      // Periodic check to ensure navbar search item persists across navbar rerenders
+      setInterval(injectNavbarSearch, 300);
+    })();
+  </script>
 </body>
 </html>
