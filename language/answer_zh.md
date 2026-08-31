@@ -601,7 +601,8 @@
 <details>
 <summary>无效的伪造信息(1)</summary>
 
->解锁后L1证书变成L3证书，但是无法返回正确L1证书信息导致的，即使使用模块替换keybox文件来伪装状态也会检测与L1不符，解决方案推荐使用[远程RKP密钥](File/rkp-release-v10.apk)安装RKPConfig后向Google请求RKP下发
+> 解锁后L1证书变成L3证书，但是无法返回正确L1证书信息导致的，即使使用模块替换keybox文件来伪装状态也会检测与L1不符
+> 解决方案推荐使用[远程RKP密钥](File/rkp-release-v10.apk)安装RKPConfig后向Google请求RKP下发
 </details>
 
 <details>
