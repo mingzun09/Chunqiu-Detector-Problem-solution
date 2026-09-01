@@ -172,6 +172,7 @@
 > - 27: USER_ID 出现在 teeEnforced
 > - 29: 无 challenge 却有 APPLICATION_ID（上表）
 > - 30: 敏感设备标识类 attest 未被拒绝（如 SERIAL）
+> - 31：安全补丁日期异常（如YYYY-MM-05,China手机厂商对安全补丁日期及推送都是统一，YYYY-MM-01,当然对国外设备pixel&Samsung做了排除，此检测安全补丁日期篡改，如pif，及TA插件的安全日期同步会篡改）
 </details>
 
 <details>
