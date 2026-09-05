@@ -738,3 +738,13 @@
 >
 > 在国外设备 Poco/三星误报情况（待修复）。
 </details>
+
+<details>
+<summary>Vold隔离已开启</summary>
+
+> 关闭HMA/HMAOSS设置终端Vold app data隔离
+> 
+> 如果关闭重启后还存在 `persist.sys.vold_app_data_isolation_enabled=0`
+> 
+> su shell执行 `resetprop -p --delete persist.sys.vold_app_data_isolation_enabled` 然后重启即可
+</details>

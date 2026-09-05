@@ -739,3 +739,13 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 > 
 > False positives on international devices like Poco/Samsung (to be fixed).
 </details>
+
+<details>
+<summary>Vold isolation enabled</summary>
+
+> Disable "Vold app data isolation" in HMA/HMAOSS settings.
+> 
+> If `persist.sys.vold_app_data_isolation_enabled=0` still exists after rebooting:
+>
+> Execute `resetprop -p --delete persist.sys.vold_app_data_isolation_enabled` in su shell, then reboot.
+</details>
