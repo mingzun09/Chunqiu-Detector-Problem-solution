@@ -1,8 +1,0 @@
-node_modules/
-docs/.vitepress/cache/
-docs/.vitepress/dist/
-docs/.vitepress/data/
-docs/public/File/
-docs/zh/
-docs/en/
-docs/thanks.md
