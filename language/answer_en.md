@@ -38,6 +38,67 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 5. **Key / TEE items**: after editing `keybox.xml`, `target.txt` or security-patch sync you **must reboot** before re-testing.
 6. A few items are **side-channel / unstable**: repeated scans in the same environment can differ, so rule out flakiness before digging further.
 
+### Chain items: first confirm Zygisk is actually injected
+
+When **several items appear at once** (typical combination: `Risk apps` + `Tampered Attestation Key` + `USB debugging enabled`),
+do not fix them one by one — that group almost always has a single root cause: **Zygisk is not injected**.
+
+The key module (TEESimulator-RS & co.), the app-hiding module (HMA-OSS) and LSPosed all run on top of Zygisk,
+so when Zygisk is down the chain reaction is:
+
+| What the UI shows | Actual cause |
+|---|---|
+| `Risk apps <a long list of packages>` | the app-hiding module is not running at all, so the hide list cannot apply |
+| `Tampered Attestation Key(24)` | incomplete key-module injection (`24` works as a signal) |
+| `USB debugging enabled` | the app-hiding module's `dev_options` preset never took effect |
+
+**Diagnose it (Zygisk Next ships its own controller — do not guess):**
+
+```sh
+su -c '/data/adb/modules/zygisksu/bin/zygiskd status'
+```
+
+- `zygote_states:N` — **only N≥1 counts as a successful injection**; `failed to connect to server` means the daemon is down → app-level injection is necessarily dead;
+- `modules_with_issue:0` — only then are the module files themselves fine;
+- if it is down, run `su -c '/data/adb/modules/zygisksu/bin/zygiskd start'` first; a **full reboot** is still required for injection at boot.
+
+**Three hard proofs (all required; `status` alone is not enough):**
+
+```sh
+su -c '/data/adb/modules/zygisksu/bin/zygiskd status'            # 1) expect zygote_states:1
+su -c 'grep -c hma /proc/$(pidof system_server)/maps'            # 2) expect > 0
+su -c 'tail -n 5 /data/misc/hide_my_applist_*/log/runtime.log'   # 3) expect fresh @shouldFilterApplication: query from <pkg>
+```
+
+The third one is the most reliable sign that the app-hiding module is genuinely filtering; seeing `Config loaded` in the log is not
+enough (that only means the config was read once at startup).
+
+**Do not misattribute**: `/system/bin/zygote_next` (`--name zygote_next --species android-native-app`) is
+**Android 17's built-in second zygote** (`/system/etc/init/zygote_next.rc`), **not** a product of the Zygisk provider module.
+To find out who really forks apps, look at the PPID: `ps -A -o PID,PPID,NAME | grep -E 'zygote|system_server'`.
+
+#### Pitfall: `module.prop`'s version string must **exactly** match the binary's self-reported format
+
+If `module.prop` was edited by hand or damaged by a cleanup script, writing the shorthand `version=1.5.0`
+makes the daemon report **`❌ Module files corrupted`** and **refuse injection outright** (the symptom is exactly the chain above returning).
+
+The correct format is `version=<X.Y.Z> (<versionCode>-<hash>-release)`. For Zygisk Next 1.5.0:
+
+```ini
+id=zygisksu
+name=Zygisk Next
+version=1.5.0 (843-5217106-release)
+versionCode=843
+author=5ec1cff, Nullptr, aviraxp
+description=Standalone implementation of Zygisk.
+updateJson=https://lsposed.zip/zygisk-next/update.json
+```
+
+- take the correct string from the `version_local` field of `zygiskd status` (the `zygiskd` binary is packed — `strings` yields nothing useful);
+- `module.prop.orig` **must also exist**, otherwise the daemon reports `[E] fopen ./module.prop.orig failed with 2`;
+- afterwards delete `/data/adb/zygisksu/.abort_msg` and `.injecting`, then do a full reboot;
+- to see the daemon's raw errors: `su -c 'echo 1 > /data/adb/zygisksu/klog'` → reboot → `dmesg | grep zn-daemon` (delete `klog` when done).
+
 ⚠️ **Security note**: any “replace keybox / replace RKP key / fake the lock state / change security-patch sync” action changes the device's key and attestation state and **may be irreversible**; evaluate the risk and back up the relevant directories first.
 
 ---
@@ -112,7 +173,7 @@ For **APatch / FolkPatch** users, additionally load **[NoHello.kpm](https://t.me
 
 #### Zygisk provider
 
-- [Zygisk-Next](https://github.com/Dr-TSNG/ZygiskNext): the most widely used standalone Zygisk implementation.
+- **Zygisk Next**: the most widely used standalone Zygisk implementation. ~~`github.com/Dr-TSNG/ZygiskNext`~~ now returns **404** along with the whole organisation (verified 2026-09); the project distributes through the update channel `https://lsposed.zip/zygisk-next/update.json` (changelog: [`changelog.md`](https://lsposed.zip/zygisk-next/changelog.md)). If you obtain a zip from a mirror, verify its origin yourself.
 
 #### App-hiding modules
 
@@ -405,7 +466,7 @@ Even efisp's fake lock or custom bootloader "may" trigger this.
 - 15: HanAttest chain inconsistency (different source from TeeSim constant below, but in the same mask)
 - 18: Vendor placeholder KeyMint tag still successfully issued a key (tee2 §1)
 - 23: Leaf certificate KeyUsage contradicts KeyPurpose in extensions
-- 24: Binder over-long alias / large transaction probe anomaly
+- 24: Binder over-long alias / large transaction probe anomaly; **it can also be a knock-on effect of incomplete key-module injection** (with Zygisk not injected, modules such as TEESimulator-RS misbehave) → confirm Zygisk injection per “Chain items: first confirm Zygisk is actually injected”, then re-test
 - 25: Leaf certificate SigAlg does not match issuing key algorithm
 - 26: Certificate patch tag inconsistent with system properties (related to security patches) ([execute this sh script](https://github.com/mingzun09/Chunqiu-Detector-Problem-solution/blob/main/File/Tampered%20Attestation%20Key(26)Pass.sh) to try resolving)
 - 27: USER_ID appears in teeEnforced
@@ -658,6 +719,51 @@ If the details contain **overlay**, change the metamodule; if a specific module 
 
 Relation: same mount family as the `/data/local/tmp` metadata anomaly family (incl. `2222`, `Futile hide 04`), `Mount loophole`, `Magic Mount` and `Mount Gap`.
 
+#### Addition: a module leaking its own **bind-mount source path** (the most easily overlooked case)
+
+The section above is about *hiding a path that already leaked*. But there is another kind of mount anomaly where
+**the hiding is fine and the module's own mounting technique is at fault**: the check reads the mount source's
+**root path** (column 4 of mountinfo). If a module binds straight out of its own directory, the path is exposed on the spot:
+
+```
+suspicious_mount[0]=pid=22931(canProbeService)
+/dev/block/dm-61 /adb/modules/xm15_baa_change_all/configs/BAA_config_xuanyuan.json
+/odm/etc/charger/BAA_config_xuanyuan.json f2fs rw,nosuid,nodev,noatime ...
+verdict=hit: suspicious mount entry
+```
+
+This case **needs no PathMask / SUSFS** — just change the module script.
+**Fix: copy the file into an already-existing tmpfs under `/dev`, then bind from that staging area.**
+
+```sh
+STAGE=/dev/baa_stage
+mkdir -p "$STAGE"
+STAGED="$STAGE/BAA_config_${CONF}.json"
+cp -f "$SRC" "$STAGED"
+chmod 644 "$STAGED"
+
+# Important: the context must match the mount target or SELinux will block it
+CTX=$(ls -Z "$TARGET" 2>/dev/null | awk '{print $1}')
+[ -n "$CTX" ] && chcon "$CTX" "$STAGED"
+
+mount --bind "$STAGED" "$TARGET"
+```
+
+The mount source becomes `tmpfs`, the root path keeps only the filename, and `/adb/modules` is gone:
+
+```
+0:18 /baa_stage/BAA_config_xuanyuan.json /odm/etc/charger/BAA_config_xuanyuan.json rw,relatime - tmpfs tmpfs ...
+```
+
+Key points:
+
+- The staging directory **must reuse an existing tmpfs (e.g. `/dev`)**. Creating your own with `mount -t tmpfs` **adds an extra
+  mountinfo entry** that another criterion may catch — robbing Peter to pay Paul.
+- **toybox's `chcon` does not support `--reference=`** (that line fails silently and the file keeps the wrong context), so read the
+  context explicitly as shown above.
+- To change the script of an **already installed** module, edit `/data/adb/modules/<id>/` directly — no need to go through
+  `modules_update` (only *installing / updating* a module requires landing in `modules_update`).
+
 ### /data/local/tmp metadata anomaly family (Futile hide / 1 / 2 / 04 / 2222)
 
 #### Detection method
@@ -768,6 +874,9 @@ reads the directory names under `/storage/emulated/0/Android/data/` to obtain in
 - To make only this item pass: in the app-hiding module enable “restrict zygote permissions” for the detector and turn on everything except `INET_GID`;
 - For items whose criteria are unknown, you can also hide the suspicious app from the detector with the app-hiding module.
 
+If that list of packages **already is in the app-hiding module's hide list**, then it is most likely not a list problem but that
+**the app-hiding module is not running at all** (Zygisk not injected) → see “Chain items: first confirm Zygisk is actually injected”.
+
 ### Dirty Device(a)
 
 #### Detection method
@@ -854,7 +963,8 @@ Checks Zygisk injection traces (anonymous executable mappings, process environme
 
 Zygisk detected — usually Magisk's built-in Zygisk (disable it) or other causes.
 
-Update the [Zygisk provider module](http://github.com/Dr-TSNG/ZygiskNext).
+Update the Zygisk provider module (e.g. Zygisk Next). **Note: `github.com/Dr-TSNG/ZygiskNext` and its whole organisation now return 404** (verified 2026-09); obtain it from the official update channel instead: `https://lsposed.zip/zygisk-next/update.json`.
+Also check whether `zygote_states` from `zygiskd status` is ≥ 1 — see “Chain items: first confirm Zygisk is actually injected”.
 
 Checks Zygisk injection traces (anonymous executable mappings, process environment, module entry, etc.).
 

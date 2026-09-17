@@ -40,6 +40,65 @@
 5. **密钥 / TEE 类条目**：修改 `keybox.xml`、`target.txt`、安全补丁同步等之后**必须重启**再复测。
 6. 少数条目属**侧信道 / 不稳定检测**：同一环境多次扫描结果可能不一致，先排除偶发再定位。
 
+### 连锁项先归因：确认「Zygisk 是否真的注入」
+
+**同时冒出多条**异常时（典型组合：`风险应用` + `Tampered Attestation Key` + `USB 调试已开启`），先别逐条修 ——
+这一组几乎总是同一个根因：**Zygisk 没有注入成功**。
+
+密钥模块（TEESimulator-RS 等）、应用隐藏模块（HMA-OSS）、LSPosed 都跑在 Zygisk 之上，Zygisk 一挂，连锁反应是：
+
+| 界面上看到的 | 真实原因 |
+|---|---|
+| `风险应用 <一长串包名>` | 应用隐藏模块根本没运行，隐藏名单自然不生效 |
+| `Tampered Attestation Key(24)` | 密钥模块注入不完整（`24` 可当信号用） |
+| `USB 调试已开启` | 应用隐藏模块的 `dev_options` 预设没生效 |
+
+**判定（Zygisk Next 自带控制器，别猜）：**
+
+```sh
+su -c '/data/adb/modules/zygisksu/bin/zygiskd status'
+```
+
+- `zygote_states:N` —— **N≥1 才算注入成功**；`failed to connect to server` = 守护进程没起来 → 应用层注入必然全灭；
+- `modules_with_issue:0` —— 才说明模块文件本身没问题；
+- 没起来先 `su -c '/data/adb/modules/zygisksu/bin/zygiskd start'`，之后仍需**完整重启**才能在启动阶段注入。
+
+**三条硬证据（缺一不可，只看 `status` 不够）：**
+
+```sh
+su -c '/data/adb/modules/zygisksu/bin/zygiskd status'            # 1) 看 zygote_states:1
+su -c 'grep -c hma /proc/$(pidof system_server)/maps'            # 2) 结果 > 0
+su -c 'tail -n 5 /data/misc/hide_my_applist_*/log/runtime.log'   # 3) 有新的 @shouldFilterApplication: query from <包名>
+```
+
+第 3 条是「应用隐藏模块真的在过滤」最可靠的信号；只看日志里的 `Config loaded` 不够（那只代表启动时读过一次配置）。
+
+**别误判**：`/system/bin/zygote_next`（`--name zygote_next --species android-native-app`）是
+**Android 17 自带的第二个 zygote**（`/system/etc/init/zygote_next.rc`），**不是** Zygisk 实现模块的产物。
+想知道谁在真正 fork 应用，看 PPID：`ps -A -o PID,PPID,NAME | grep -E 'zygote|system_server'`。
+
+#### 坑：`module.prop` 的版本串必须与该版本二进制自报格式**严格一致**
+
+手动编辑过、或被清理脚本弄坏过 `module.prop` 时，把 `version=` 写成 `1.5.0` 这种简写，
+守护进程会报 **`❌ Module files corrupted`** 并**直接拒绝注入**（表现就是上面那组连锁项全回来）。
+
+正确格式是 `version=<X.Y.Z> (<versionCode>-<hash>-release)`。以 Zygisk Next 1.5.0 为例：
+
+```ini
+id=zygisksu
+name=Zygisk Next
+version=1.5.0 (843-5217106-release)
+versionCode=843
+author=5ec1cff, Nullptr, aviraxp
+description=Standalone implementation of Zygisk.
+updateJson=https://lsposed.zip/zygisk-next/update.json
+```
+
+- 正确的版本串从 `zygiskd status` 的 `version_local` 字段取（`zygiskd` 加过壳，`strings` 提不出有效串）；
+- `module.prop.orig` **必须同时存在**，否则守护进程报 `[E] fopen ./module.prop.orig failed with 2`；
+- 改完删掉 `/data/adb/zygisksu/.abort_msg`、`.injecting`，再完整重启；
+- 想看守护进程原始报错：`su -c 'echo 1 > /data/adb/zygisksu/klog'` → 重启 → `dmesg | grep zn-daemon`（诊断完把 `klog` 删掉）。
+
 ⚠️ **安全提示**：任何“更换 keybox / 更换 RKP 密钥 / 改回锁状态 / 改安全补丁同步”的操作都会改变设备的密钥与认证（attestation）状态，**不一定可逆**；操作前请评估风险，必要时先备份相关目录。
 
 ---
@@ -116,7 +175,7 @@ Bootloader（ABL）解锁标志已被真实置位，系统放行未经签名校�
 
 #### Zygisk 实现模块
 
-- [Zygisk-Next](https://github.com/Dr-TSNG/ZygiskNext)：最为广泛使用的 Zygisk 独立实现模块。
+- **Zygisk Next**：最为广泛使用的 Zygisk 独立实现模块。~~`github.com/Dr-TSNG/ZygiskNext`~~ 已随该组织一并 **404**（2026-09 实测），项目发布改走更新通道 `https://lsposed.zip/zygisk-next/update.json`（更新日志见 [`changelog.md`](https://lsposed.zip/zygisk-next/changelog.md)）；经过镜像传播的第三方 zip 请自行校验来源。
 
 #### 应用隐藏模块
 
@@ -427,7 +486,7 @@ native 方法 `runRootManagerIntentChecks` —— 用 Intent / 包可见性（`<
 - 16：HanAttest 链不一致一族（多为误报）
 - 18：厂商占位 KeyMint tag 仍成功输出密钥
 - 23：叶证书 KeyUsage 与扩展内 KeyPurpose 矛盾
-- 24：Binder 超长 alias / 大事务探针异常
+- 24：Binder 超长 alias / 大事务探针异常；**也可能是密钥模块注入不完整的连带表现**（Zygisk 未注入时 TEESimulator-RS 一类模块工作不正常）→ 先按「连锁项先归因」确认 Zygisk 注入，再重测
 - 25：叶证书 SigAlg 与签发钥算法不符
 - 26：证书 patch 标签与系统属性不一致（见下方脚本）
 - 27：USER_ID 出现在 teeEnforced
@@ -683,6 +742,47 @@ Magic Mount 对系统修改模块挂载生效
 若展开内容里出现 **overlay** 字样 → 更换元模块（如 Hybrid-Mount，见序章「相关模块推荐」）；若确定是某模块导致的挂载 → 卸载该模块。
 关系：与 `/data/local/tmp 元数据异常族`（含 `2222`、`Futile hide 04`）、`Mount loophole`、`Magic Mount`、`挂载间隙` 同属挂载类；处理手段相同（Zygisk 实现模块「仅还原挂载」、换元模块（如 Hybrid-Mount）、PathMask/SUSFS 隐藏）。
 
+#### 补充：模块自身 bind 挂载的**源路径泄露**（最容易被忽略的一类）
+
+上面给的是「把已经泄露的路径藏起来」。但还有一类挂载异常**不是隐藏没做好，而是模块自己的挂载做法就有问题**：
+判定读的是挂载源的**根路径**（mountinfo 第 4 列）。模块若直接从自己的目录 bind，路径当场暴露：
+
+```
+suspicious_mount[0]=pid=22931(canProbeService)
+/dev/block/dm-61 /adb/modules/xm15_baa_change_all/configs/BAA_config_xuanyuan.json
+/odm/etc/charger/BAA_config_xuanyuan.json f2fs rw,nosuid,nodev,noatime ...
+verdict=hit: suspicious mount entry
+```
+
+这种情况**不需要 PathMask / SUSFS**，改模块脚本即可。
+**修法：先把文件复制到 `/dev` 下已存在的 tmpfs，再从暂存区 bind。**
+
+```sh
+STAGE=/dev/baa_stage
+mkdir -p "$STAGE"
+STAGED="$STAGE/BAA_config_${CONF}.json"
+cp -f "$SRC" "$STAGED"
+chmod 644 "$STAGED"
+
+# 关键：上下文必须与挂载目标一致，否则 SELinux 会挡
+CTX=$(ls -Z "$TARGET" 2>/dev/null | awk '{print $1}')
+[ -n "$CTX" ] && chcon "$CTX" "$STAGED"
+
+mount --bind "$STAGED" "$TARGET"
+```
+
+挂载源变成 `tmpfs`、根路径只剩文件名，`/adb/modules` 消失：
+
+```
+0:18 /baa_stage/BAA_config_xuanyuan.json /odm/etc/charger/BAA_config_xuanyuan.json rw,relatime - tmpfs tmpfs ...
+```
+
+要点：
+
+- 暂存目录**必须复用已有 tmpfs（如 `/dev`）**。自己 `mount -t tmpfs` 新建暂存区会**多出一条 mountinfo 记录**，可能被别的判据命中，等于拆东墙补西墙；
+- **toybox 的 `chcon` 不支持 `--reference=`**（这行会静默失败，文件带着错误上下文），必须像上面那样显式取；
+- 改**已安装**模块的脚本，直接改 `/data/adb/modules/<id>/` 即可，不需要走 `modules_update`（只有「安装 / 更新模块」才必须落到 `modules_update`）。
+
 ### /data/local/tmp 元数据异常族（Futile hide / 1 / 2 / 04 / 2222）
 
 #### 检测方式
@@ -760,6 +860,8 @@ Magic Mount 对系统修改模块挂载生效
 - 有效组合：**应用隐藏模块黑名单模式 + 零宽读取修复方案**（[FuseFixer](https://github.com/5ec1cff/FuseFixer)）；部分机型开启作用域后可能卡开机，安全模式关掉即可；
 - 只想让春秋这一项通过：在应用隐藏模块里对检测春秋检测打开「限制 zygote 权限」，除 `INET_GID` 外全开；
 - 这类判定手段未知的条目，也可用应用隐藏模块把可疑应用对检测器隐藏。
+
+若这串包名**确实已经在应用隐藏模块的隐藏名单里**，那多半不是名单问题，而是**应用隐藏模块压根没运行**（Zygisk 未注入）→ 见「连锁项先归因」。
 
 ### Dirty Device(a)
 
@@ -844,7 +946,8 @@ Magic Mount 对系统修改模块挂载生效
 
 检测到 Zygisk，通常是 magisk 自带的 zygisk 导致（关闭解决）或者其他原因。
 
-升级 Zygisk 实现模块(http://github.com/Dr-TSNG/ZygiskNext)。
+升级 Zygisk 实现模块（如 Zygisk Next）。**注意：`github.com/Dr-TSNG/ZygiskNext` 及其所属组织整站已 404**（2026-09 实测），请改从官方更新通道获取：`https://lsposed.zip/zygisk-next/update.json`。
+同时确认 `zygiskd status` 的 `zygote_states` 是否 ≥ 1 —— 详见 [连锁项先归因](#连锁项先归因确认zygisk-是否真的注入)。
 
 ### Suspicious Surroundings (a)
 
