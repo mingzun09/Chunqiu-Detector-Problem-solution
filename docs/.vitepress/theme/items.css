@@ -165,3 +165,6 @@
 @media (min-width: 1440px) {
   .VPDoc .content-container { max-width: min(760px, calc(100vw - var(--vp-sidebar-width) - 72px)) !important; }
 }
+
+.cq-reading-note { margin: 24px 0 32px; padding: 18px 20px; border-left: 4px solid var(--vp-c-brand-1); border-radius: 8px; background: var(--vp-c-bg-soft); font-size: 20px; line-height: 1.8; font-weight: 650; }
+.cq-reading-note a { color: var(--vp-c-brand-1); text-decoration: underline; text-underline-offset: 3px; }

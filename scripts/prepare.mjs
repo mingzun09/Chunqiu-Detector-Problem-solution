@@ -85,6 +85,7 @@ function convert(md, lang) {
 
   const prologueSections = sectionsOf(prologue)
   const itemSections = sectionsOf(items)
+  const detectionCount = itemSections.filter(s => !/^(附录|Appendices)$/.test(s.category)).reduce((n,s) => n+s.items.length,0)
 
   const copy = lang === 'zh'
     ? `<div class="cq-copyright">
@@ -102,14 +103,14 @@ Licensed under <a href="https://creativecommons.org/licenses/by/4.0/" target="_b
 
   const chapters = lang === 'zh'
     ? `<div class="cq-chapters">
-<a href="./"><span class="n">第一章</span><span class="t">概述</span><span class="d">项目信息 · 免责声明 · 说明与反馈 · 版权</span></a>
-<a href="prologue"><span class="n">第二章</span><span class="t">前言</span><span class="d">术语定义 · 最小模块集合 · 模块推荐 · 正确配置</span></a>
-<a href="items"><span class="n">第三章</span><span class="t">正文</span><span class="d">95 个检测项：检测方式 · 分组说明 · 解决办法</span></a>
+<a href="./"><span class="n">第一章</span><span class="t">概述</span><span class="d">项目信息 · 免责声明 · 用语说明 · 说明与反馈 · 版权</span></a>
+<a href="prologue"><span class="n">第二章</span><span class="t">前言</span><span class="d">最小模块集合 · 模块推荐 · 正确配置</span></a>
+<a href="items"><span class="n">第三章</span><span class="t">正文</span><span class="d">${detectionCount} 个检测项：检测方式 · 分组说明 · 解决办法</span></a>
 </div>`
     : `<div class="cq-chapters">
 <a href="./"><span class="n">Chapter 1</span><span class="t">Overview</span><span class="d">Project info · Disclaimer · Help &amp; Feedback · License</span></a>
-<a href="prologue"><span class="n">Chapter 2</span><span class="t">Prologue</span><span class="d">Terminology · Minimal module set · Recommendations · Configuration</span></a>
-<a href="items"><span class="n">Chapter 3</span><span class="t">Detection Items</span><span class="d">95 items: detection method · notes · solutions</span></a>
+<a href="prologue"><span class="n">Chapter 2</span><span class="t">Prologue</span><span class="d">Minimal module set · Recommendations · Configuration</span></a>
+<a href="items"><span class="n">Chapter 3</span><span class="t">Detection Items</span><span class="d">${detectionCount} items: detection method · notes · solutions</span></a>
 </div>`
 
   const finish = (text) =>
@@ -126,11 +127,13 @@ Licensed under <a href="https://creativecommons.org/licenses/by/4.0/" target="_b
   const pages = {
     intro: finish(intro).replace(/(\n)(##\s+)/, `$1${chapters}\n$1$2`),
     prologue: finish(promote(prologue, lang === 'zh' ? '前言' : 'Prologue')),
-    items: finish(promote(items) )
+    items: finish(promote(items).replace(/^(# .+\n)/, '$1\n' + (lang === 'zh'
+      ? '<div class="cq-reading-note">有关用语详见<a href="./#用语介绍与规范">第一章</a>，有关模块推荐/配置详见<a href="prologue">第二章</a>。</div>\n'
+      : '<div class="cq-reading-note">See <a href="./#terminology-conventions">Chapter 1</a> for terminology and <a href="prologue">Chapter 2</a> for module recommendations and configuration.</div>\n')))
   }
 
   const sidebar = [
-    { text: lang === 'zh' ? '第一章 · 概述' : 'Chapter 1 · Overview', link: `/${lang}/` },
+    { text: lang === 'zh' ? '第一章 · 概述' : 'Chapter 1 · Overview', link: `/${lang}/`, collapsed: false, items: sectionsOf(intro).flatMap(s => s.items.map(it => ({text:it.title,link:`/${lang}/#${it.slug}`}))) },
     {
       text: lang === 'zh' ? '第二章 · 前言' : 'Chapter 2 · Prologue',
       link: `/${lang}/prologue`,
