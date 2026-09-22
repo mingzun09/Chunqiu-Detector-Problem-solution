@@ -40,7 +40,7 @@ The repository bundles a number of automated fix scripts and KPM modules under t
 - `/File/shamiko_Plus.sh` — hides the property-area hole modification
 - `/File/Bin/Nohello-v1.8.2.9-83-b3e7d87-release.kpm` — APatch hiding KPM module
 - `/File/Doc/ksu_kp_sidechannel_zh.md` — explains the KSU/APatch side-channel detection principle
-- `/File/Doc/thanks.md` — credits list
+- [`/File/Doc/thanks.md`](File/Doc/thanks.md) — credits list (full attribution)
 
 ---
 
@@ -49,6 +49,18 @@ The repository bundles a number of automated fix scripts and KPM modules under t
 Issues and pull requests that add new detection items and solutions are very welcome!
 
 You can fork and modify the repository, then open pull requests. I will check and merge them.
+
+---
+
+## Credits
+
+Full attribution lives in **[`File/Doc/thanks.md`](File/Doc/thanks.md)** — documentation contributors, special thanks, and tooling, each with commit/PR evidence.
+
+- **Documentation contributors:** 铭鐏 ([@mingzun09](https://github.com/mingzun09)) · [@YiJieqwq](https://github.com/YiJieqwq) · 741afb7 · huoyan1231 · juanma0511 · Young-Six-6 · HongSir6
+- **Special thanks:** [Matsuzaka Yuki](https://github.com/matsuzaka-yuki) · [JeTeeZnTmax](https://github.com/jeteezntmax)
+- **Tools & automation:** google-labs-jules[bot]
+
+> [@JeTeeZnTmax](https://github.com/jeteezntmax) contributed the organisation and leads for **16 detection items** but never committed to this repository, so they do not appear in GitHub's contributor list — recorded in the credits file instead.
 
 ---
 
