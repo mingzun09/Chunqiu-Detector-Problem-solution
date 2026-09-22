@@ -1,56 +1,58 @@
-# Chunqiu Detector-Problem solution / 春秋检测器问题解决方案
+# Chunqiu Detector-Problem solution
 
-> You can select your language below to view this document or visit our interactive online documentation platform.
->
-> 您可以在下方选择语言查看此文档，或访问我们的在线交互文档平台（支持实时关键词搜索）。
+**English** | [中文](README.zh-CN.md)
 
-## 🌐 在线文档 / Online Docs (GitHub Pages)
+> Pick your language below to read the document, or visit our interactive online documentation site.
+
+## 🌐 Online Docs (GitHub Pages)
+
 👉 **[https://mingzun09.github.io/Chunqiu-Detector-Problem-solution/](https://mingzun09.github.io/Chunqiu-Detector-Problem-solution/)**
 
-站点使用 **VitePress** 构建：侧边栏按分类折叠并列出全部检测项、支持中文分词搜索、深色/浅色主题。
-文档内容仍维护在本仓库的 `language/answer_zh.md` 与 `language/answer_en.md`（**无需改站点文件**，提交后自动构建）。
+The site is built with **VitePress**: a sidebar that collapses by category and lists every detection item, Chinese word-segmentation search, and dark/light themes.
+The document content is still maintained in this repository under `language/answer_zh.md` and `language/answer_en.md` (**no site files need editing** — the site rebuilds automatically after a commit).
 
 ```bash
-npm install          # 安装依赖（Node 20+）
-npm run docs:dev     # 本地预览 http://localhost:5173/Chunqiu-Detector-Problem-solution/
-npm run docs:build   # 构建到 docs/.vitepress/dist
+npm install          # Install dependencies (Node 20+)
+npm run docs:dev     # Local preview at http://localhost:5173/Chunqiu-Detector-Problem-solution/
+npm run docs:build   # Build into docs/.vitepress/dist
 ```
-> 站点源码在 `docs/`（配置 `docs/.vitepress/config.mts`），构建前由 `scripts/prepare.mjs` 自动：
-> 拷贝 `File/` 附件、把两份 markdown 转成页面并注入条目锚点、生成侧边栏数据。
+
+> The site source lives in `docs/` (config at `docs/.vitepress/config.mts`). Before building, `scripts/prepare.mjs` automatically copies the `File/` attachments, converts both markdown files into pages with entry anchors injected, and generates the sidebar data.
 
 ---
 
-## 语言选择 / Language
+## Language
+
 Select one of the following languages to view the solution file.
-请选择以下语言之一来查看解决方案文件。
 
 [中文解决方案](/language/answer_zh.md) | [English Solutions](/language/answer_en.md)
 
-> 文档中包含大量嵌入式链接（蓝色突出显示），点击即可跳转至对应的项目/文件地址。
-> There are many embedded links in the document (highlighted in blue). You can click on them to be redirected to the relevant project/file address.
+> The document contains many embedded links (highlighted in blue). Click them to jump to the relevant project or file.
 
 ---
 
-## 依赖与文件说明 / Files & Attachments
+## Files & Attachments
 
-仓库中包含了部分自动化修复脚本与 KPM 模块，位于 `/File/` 目录下：
-- `/File/Found property.sh` - 修复 Found property 属性检测
-- `/File/Tampered Attestation Key(26)Pass.sh` - 修复证书 Patch 标签异常
-- `/File/shamiko_Plus.sh` - 隐藏属性区空洞修改
-- `/File/Bin/Nohello-v1.8.2.9-83-b3e7d87-release.kpm` - APatch 隐藏 KPM 模块
-- `/File/Doc/ksu_kp_sidechannel_zh.md` - KSU/APatch 侧信道检测原理说明
-=======
-仓库中包含了部分自动化修复脚本与 KPM 模块，位于 `/file/` 目录下：
-- `/file/found property.sh` - 修复 Found property 属性检测
-- `/file/tampered attestation key(26)pass.sh` - 修复证书 Patch 标签异常
-- `/file/shamiko_plus.sh` - 隐藏属性区空洞修改
-- `/file/bin/nohello-v1.8.2.9-83-b3e7d87-release.kpm` - APatch 隐藏 KPM 模块
-- `/file/doc/ksu_kp_sidechannel_zh.md` - KSU/APatch 侧信道检测原理说明
-- `File/Doc/thanks.md` - 致谢清单 / Credits list
+The repository bundles a number of automated fix scripts and KPM modules under the `/File/` directory:
+
+- `/File/Found property.sh` — fixes the "Found property" property detection
+- `/File/Tampered Attestation Key(26)Pass.sh` — fixes the anomalous certificate Patch tag
+- `/File/shamiko_Plus.sh` — hides the property-area hole modification
+- `/File/Bin/Nohello-v1.8.2.9-83-b3e7d87-release.kpm` — APatch hiding KPM module
+- `/File/Doc/ksu_kp_sidechannel_zh.md` — explains the KSU/APatch side-channel detection principle
+- `/File/Doc/thanks.md` — credits list
 
 ---
 
-## 反馈与参与贡献 / Feedback & Contribute
-欢迎提交 Issues 或 Pull Requests 补充新的检测项及解决方案！
+## Feedback & Contribute
 
-You can fork and modify the repository, then pull requests. I will check and merge them.
+Issues and pull requests that add new detection items and solutions are very welcome!
+
+You can fork and modify the repository, then open pull requests. I will check and merge them.
+
+---
+
+## Maintainers
+
+- [@mingzun09](https://github.com/mingzun09) — repository owner
+- [@YiJieqwq](https://github.com/YiJieqwq) — maintainer
