@@ -41,7 +41,7 @@ npm run docs:build   # 构建到 docs/.vitepress/dist
 - `/File/shamiko_Plus.sh` — 隐藏属性区空洞修改
 - `/File/Bin/Nohello-v1.8.2.9-83-b3e7d87-release.kpm` — APatch 隐藏 KPM 模块
 - `/File/Doc/ksu_kp_sidechannel_zh.md` — KSU/APatch 侧信道检测原理说明
-- `/File/Doc/thanks.md` — 致谢清单 / Credits list
+- [`/File/Doc/thanks.md`](File/Doc/thanks.md) — 致谢清单（完整署名）
 
 ---
 
@@ -50,6 +50,18 @@ npm run docs:build   # 构建到 docs/.vitepress/dist
 欢迎提交 Issues 或 Pull Requests 补充新的检测项及解决方案！
 
 You can fork and modify the repository, then pull requests. I will check and merge them.
+
+---
+
+## 致谢
+
+完整致谢清单见 **[`File/Doc/thanks.md`](File/Doc/thanks.md)** —— 文档贡献者、特别致谢与工具自动化，每条均附提交/PR 佐证。
+
+- **文档贡献者：** 铭鐏（[@mingzun09](https://github.com/mingzun09)）· [@YiJieqwq](https://github.com/YiJieqwq) · 741afb7 · huoyan1231 · juanma0511 · Young-Six-6 · HongSir6
+- **特别致谢：** [Matsuzaka Yuki](https://github.com/matsuzaka-yuki) · [JeTeeZnTmax](https://github.com/jeteezntmax)
+- **工具与自动化：** google-labs-jules[bot]
+
+> [@JeTeeZnTmax](https://github.com/jeteezntmax) 提供了 **16 个检测点**的整理与线索，但未在本仓库提交，故不出现在 GitHub 贡献者列表中，已在致谢清单中记录。
 
 ---
 
