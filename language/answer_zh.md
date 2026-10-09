@@ -7,7 +7,7 @@
 
 ---
 
-<details><summary><b>## 声明</b></summary>
+<details><summary><b>声明</b></summary>
 **1. 合规与用途约束**
 春秋检测器及本文档提供的环境检测和处置方案，**仅面向 Android 技术爱好者**，专用于**技术学习、环境研究与探讨**。**严禁**将本文档中的任何方案用于绕过应用反作弊、规避风控机制、游戏作弊等一切违法违规场景。因违规使用而产生的任何后果与责任，均由使用者自行承担。
 
@@ -167,6 +167,7 @@ c. 正确配置 boot hash（正常情况下会自动设置）。
 ---
 
 </details>
+
 ## 检测项正文
 
 ## Root 权限与 SELinux 检测
@@ -427,6 +428,7 @@ native 方法 `runRootManagerIntentChecks` —— 用 Intent / 包可见性（`<
 ---
 
 </details>
+
 ## TEE 与密钥证明检测
 
 <details><summary><b>Tee伪造3</b></summary>
@@ -672,6 +674,7 @@ Bootloader（ABL）解锁标志已被真实置位，系统放行未经签名校�
 ---
 
 </details>
+
 ## 挂载与命名空间检测
 
 <details><summary><b>Mount Detector(7)</b></summary>
@@ -833,6 +836,7 @@ Magic Mount 对系统修改模块挂载生效
 ---
 
 </details>
+
 ## 环境、进程与文件检测
 
 <details><summary><b>Miscellaneous Check(12)</b></summary>
@@ -1247,6 +1251,7 @@ native 方法 `runFormalUsbDebuggingCheck`；静态产物中未见 `adb_enabled`
 ---
 
 </details>
+
 ## 内核、属性与系统特征检测
 
 <details><summary><b>LineageOS detection</b></summary>
@@ -1497,6 +1502,7 @@ su shell执行 `resetprop -p --delete persist.sys.vold_app_data_isolation_enable
 ---
 
 </details>
+
 ## 附录
 
 <details><summary><b>附录 A：风险 / 黑名单包名（85 个）</b></summary>
