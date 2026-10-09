@@ -488,8 +488,7 @@ native 方法 `runRootManagerIntentChecks` —— 用 Intent / 包可见性（`<
 
 #### 解决方法
 
-- 等待模块更新（不太可能实现 SoterService 的修复）
-- 使用 SusFS 或 PathMask 隐藏相关服务路径，并使用应用隐藏模块对检测器隐藏 Soter 系统服务应用程序尝试解决
+- 使用 SusFS 或 [PathMask](https://github.com/Andrea-lyz/LKM-PathMask) 隐藏相关服务路径，并使用HMA对检测器隐藏 “com.tencent.soter.soterserver” 系统程序，尝试解决
 
 *注意*：PathMask 并不专注于环境隐藏，请慎用。
 
