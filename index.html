@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>春秋检测器问题解决方案 - Chunqiu Detector Problem Solutions</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <meta name="description" content="春秋检测器问题解决方案 (Chunqiu Detector Problem Solution)">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+  <!-- Docsify Theme -->
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css">
+</head>
+<body>
+  <div id="app">加载中... / Loading...</div>
+  <script>
+    window.$docsify = {
+      name: '春秋检测器解决方案',
+      repo: 'https://github.com/mingzun09/Chunqiu-Detector-Problem-solution',
+      homepage: 'language/answer_zh.md',
+      auto2top: true,
+      loadNavbar: true,
+      loadSidebar: true,
+      subMaxLevel: 3,
+      alias: {
+        '/.*/_navbar.md': '/_navbar.md',
+        '/.*/_sidebar.md': '/_sidebar.md'
+      },
+      search: {
+        maxAge: 86400000,
+        paths: [
+          '/language/answer_zh.md',
+          '/language/answer_en.md'
+        ],
+        placeholder: {
+          '/': '搜索检测项或解决方案...',
+          '/language/': 'Search detection items or solutions...'
+        },
+        noData: {
+          '/': '未找到相关结果',
+          '/language/': 'No results found'
+        },
+        depth: 4
+      }
+    }
+  </script>
+  <!-- Docsify Core -->
+  <script src="//cdn.jsdelivr.net/npm/docsify@4/lib/docsify.min.js"></script>
+  <!-- Search Plugin -->
+  <script src="//cdn.jsdelivr.net/npm/docsify@4/lib/plugins/search.min.js"></script>
+  <!-- Copy code plugin -->
+  <script src="//cdn.jsdelivr.net/npm/docsify-copy-code/dist/docsify-copy-code.min.js"></script>
+
+  <style>
+    /* Navbar search styling */
+    .app-nav li.nav-search-item {
+      margin: 0 10px;
+      display: inline-flex;
+      align-items: center;
+      vertical-align: middle;
+      position: relative;
+    }
+
+    .app-nav li.nav-search-item .nav-search-input {
+      padding: 5px 12px;
+      border: 1px solid #ccc;
+      border-radius: 15px;
+      outline: none;
+      font-size: 13px;
+      width: 150px;
+      transition: all 0.3s ease;
+      background: #fff;
+      color: #333;
+    }
+
+    .app-nav li.nav-search-item .nav-search-input:focus {
+      border-color: #42b983;
+      box-shadow: 0 0 6px rgba(66, 185, 131, 0.4);
+      width: 190px;
+    }
+
+    /* Floating dropdown search results panel */
+    .app-nav li.nav-search-item .nav-search-dropdown {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      width: 360px;
+      max-height: 420px;
+      overflow-y: auto;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+      display: none;
+      padding: 8px 0;
+      text-align: left;
+      font-size: 13px;
+      box-sizing: border-box;
+    }
+
+    .app-nav li.nav-search-item .nav-search-dropdown.show {
+      display: block;
+    }
+
+    .app-nav li.nav-search-item .nav-search-dropdown .matching-post {
+      padding: 10px 14px;
+      border-bottom: 1px solid #f1f5f9;
+      transition: background-color 0.2s ease;
+    }
+
+    .app-nav li.nav-search-item .nav-search-dropdown .matching-post:last-child {
+      border-bottom: none;
+    }
+
+    .app-nav li.nav-search-item .nav-search-dropdown .matching-post:hover {
+      background-color: #f8fafc;
+    }
+
+    .app-nav li.nav-search-item .nav-search-dropdown h2 {
+      font-size: 14px;
+      margin: 0 0 4px 0;
+      color: #42b983;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+
+    .app-nav li.nav-search-item .nav-search-dropdown p {
+      margin: 0;
+      color: #64748b;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .app-nav li.nav-search-item .nav-search-dropdown a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .app-nav li.nav-search-item .nav-search-dropdown .search-keyword {
+      color: #42b983;
+      font-weight: bold;
+    }
+
+    .app-nav li.nav-search-item .nav-search-dropdown .no-results {
+      padding: 12px 16px;
+      color: #94a3b8;
+      text-align: center;
+    }
+
+    @media screen and (max-width: 768px) {
+      body .content {
+        padding-top: 100px !important;
+      }
+
+      .app-nav {
+        position: absolute;
+        top: 12px;
+        right: 55px;
+        left: 15px;
+        text-align: center;
+      }
+
+      .app-nav ul {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: 6px 12px;
+        margin: 0;
+        padding: 0;
+      }
+
+      .app-nav li {
+        margin: 0 !important;
+        display: inline-flex !important;
+        align-items: center;
+      }
+
+      .app-nav li.nav-search-item {
+        width: 100%;
+        justify-content: center;
+        margin-bottom: 4px !important;
+      }
+
+      .app-nav li.nav-search-item .nav-search-input {
+        width: 90% !important;
+        max-width: 280px !important;
+        box-sizing: border-box;
+      }
+
+      .app-nav li.nav-search-item .nav-search-input:focus {
+        width: 95% !important;
+        max-width: 300px !important;
+      }
+
+      .app-nav li.nav-search-item .nav-search-dropdown {
+        left: 5%;
+        right: 5%;
+        width: 90%;
+        max-width: 320px;
+        margin: 0 auto;
+      }
+    }
+
+    /* Details smooth animation & styling */
+    details {
+      border: 1px solid #e8e8e8;
+      border-radius: 6px;
+      padding: 10px 14px;
+      margin: 12px 0;
+      background-color: #fafafa;
+      transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    details[open] {
+      background-color: #fff;
+      border-color: #42b983;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    details summary {
+      cursor: pointer;
+      font-weight: 600;
+      color: #2c3e50;
+      outline: none;
+      transition: color 0.2s ease;
+    }
+
+    details summary:hover {
+      color: #42b983;
+    }
+
+    details[open] summary {
+      margin-bottom: 10px;
+      border-bottom: 1px dashed #e8e8e8;
+      padding-bottom: 8px;
+    }
+
+    details[open] > *:not(summary) {
+      animation: details-fade-in 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes details-fade-in {
+      from {
+        opacity: 0;
+        transform: translateY(-6px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Highlight matching details on search navigation */
+    details.search-highlight {
+      animation: highlight-pulse 2s ease-in-out;
+      border-left: 4px solid #42b983;
+      padding-left: 8px;
+    }
+
+    @keyframes highlight-pulse {
+      0% { background-color: rgba(66, 185, 131, 0.25); }
+      50% { background-color: rgba(66, 185, 131, 0.15); }
+      100% { background-color: transparent; }
+    }
+  </style>
+
+  <script>
+    (function () {
+      let lastSearchQuery = '';
+
+      function getSearchQuery() {
+        const navInput = document.querySelector('.nav-search-input');
+        const sidebarInput = document.querySelector('.sidebar .search input[type="search"]');
+        return (navInput && navInput.value.trim()) || (sidebarInput && sidebarInput.value.trim()) || lastSearchQuery;
+      }
+
+      function updateNavbarSearchPlaceholder() {
+        const navInput = document.querySelector('.nav-search-input');
+        if (!navInput) return;
+        const isEnglish = window.location.hash.includes('answer_en');
+        navInput.placeholder = isEnglish ? 'Search...' : '搜索...';
+      }
+
+      function syncSearchResultsToDropdown() {
+        const dropdown = document.querySelector('.nav-search-dropdown');
+        const sidebarResults = document.querySelector('.sidebar .search .results-panel');
+        if (!dropdown) return;
+
+        if (sidebarResults) {
+          dropdown.innerHTML = sidebarResults.innerHTML;
+        } else {
+          dropdown.innerHTML = '';
+        }
+      }
+
+      function showDropdownIfNotEmpty() {
+        const dropdown = document.querySelector('.nav-search-dropdown');
+        const query = getSearchQuery();
+        if (dropdown) {
+          if (query.length > 0) {
+            dropdown.classList.add('show');
+          } else {
+            dropdown.classList.remove('show');
+          }
+        }
+      }
+
+      function injectNavbarSearch() {
+        const navUl = document.querySelector('.app-nav ul');
+        if (!navUl) return;
+
+        let li = navUl.querySelector('.nav-search-item');
+        if (!li) {
+          li = document.createElement('li');
+          li.className = 'nav-search-item';
+
+          const input = document.createElement('input');
+          input.type = 'search';
+          input.className = 'nav-search-input';
+          input.ariaLabel = 'Search text';
+
+          const dropdown = document.createElement('div');
+          dropdown.className = 'nav-search-dropdown';
+
+          li.appendChild(input);
+          li.appendChild(dropdown);
+
+          // Sync input events to sidebar search
+          input.addEventListener('input', function (e) {
+            const val = e.target.value;
+            lastSearchQuery = val.trim();
+            const sidebarInput = document.querySelector('.sidebar .search input[type="search"]');
+            if (sidebarInput) {
+              sidebarInput.value = val;
+              sidebarInput.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+            syncSearchResultsToDropdown();
+            showDropdownIfNotEmpty();
+          });
+
+          input.addEventListener('focus', function () {
+            syncSearchResultsToDropdown();
+            showDropdownIfNotEmpty();
+          });
+        }
+
+        if (navUl.firstChild !== li) {
+          navUl.insertBefore(li, navUl.firstChild);
+        }
+
+        updateNavbarSearchPlaceholder();
+      }
+
+      // Observe mutation in sidebar search results to sync live updates to floating dropdown
+      const searchObserver = new MutationObserver(function () {
+        syncSearchResultsToDropdown();
+        showDropdownIfNotEmpty();
+      });
+
+      function setupSearchObserver() {
+        const sidebarSearch = document.querySelector('.sidebar .search');
+        if (sidebarSearch) {
+          searchObserver.observe(sidebarSearch, { childList: true, subtree: true });
+        }
+      }
+
+      // Close dropdown when clicking outside or pressing Escape
+      document.addEventListener('click', function (e) {
+        const navSearchItem = document.querySelector('.nav-search-item');
+        const dropdown = document.querySelector('.nav-search-dropdown');
+        if (dropdown && navSearchItem && !navSearchItem.contains(e.target)) {
+          dropdown.classList.remove('show');
+        }
+      });
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+          const dropdown = document.querySelector('.nav-search-dropdown');
+          if (dropdown) dropdown.classList.remove('show');
+        }
+      });
+
+      // Sync sidebar search back to navbar search
+      document.addEventListener('input', function (e) {
+        if (e.target && e.target.matches('.sidebar .search input[type="search"]')) {
+          const navInput = document.querySelector('.nav-search-input');
+          if (navInput && navInput.value !== e.target.value) {
+            navInput.value = e.target.value;
+          }
+          lastSearchQuery = e.target.value.trim();
+        }
+      });
+
+      function expandAndScrollToMatch(targetHeadingId, query) {
+        if (!query) return;
+
+        setTimeout(function () {
+          const queryLower = query.toLowerCase();
+          const allDetails = Array.from(document.querySelectorAll('article#main details'));
+          let matchedDetails = [];
+
+          // If a section heading target exists, prefer details in that section
+          if (targetHeadingId) {
+            const headingEl = document.getElementById(targetHeadingId);
+            if (headingEl) {
+              // Find details following this heading until next H1/H2
+              let curr = headingEl.nextElementSibling;
+              while (curr && !['H1', 'H2'].includes(curr.tagName)) {
+                if (curr.tagName === 'DETAILS') {
+                  const text = curr.textContent || curr.innerText || '';
+                  if (text.toLowerCase().includes(queryLower)) {
+                    matchedDetails.push(curr);
+                  }
+                }
+                curr = curr.nextElementSibling;
+              }
+            }
+          }
+
+          // Fallback: search across all details if no heading match found
+          if (matchedDetails.length === 0) {
+            matchedDetails = allDetails.filter(d => {
+              const text = d.textContent || d.innerText || '';
+              return text.toLowerCase().includes(queryLower);
+            });
+          }
+
+          if (matchedDetails.length > 0) {
+            // Expand all matched details
+            matchedDetails.forEach(d => {
+              d.open = true;
+            });
+
+            // Scroll to the first match
+            const firstMatch = matchedDetails[0];
+            firstMatch.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            // Highlight temporarily
+            firstMatch.classList.remove('search-highlight');
+            void firstMatch.offsetWidth; // trigger reflow
+            firstMatch.classList.add('search-highlight');
+          }
+        }, 150);
+      }
+
+      // Intercept clicks on search result items
+      document.addEventListener('click', function (e) {
+        const link = e.target.closest('.matching-post a');
+        if (link) {
+          const href = link.getAttribute('href') || '';
+          const hashIdx = href.indexOf('#');
+          const hashStr = hashIdx !== -1 ? href.substring(hashIdx) : href;
+
+          let headingId = '';
+          const queryMatch = hashStr.match(/\?id=([^&]+)/) || hashStr.match(/#.*[\?&]id=([^&]+)/);
+          if (queryMatch) {
+            headingId = decodeURIComponent(queryMatch[1]);
+          }
+
+          const query = getSearchQuery();
+          expandAndScrollToMatch(headingId, query);
+
+          // Dismiss floating search dropdown after clicking a result
+          const dropdown = document.querySelector('.nav-search-dropdown');
+          if (dropdown) {
+            dropdown.classList.remove('show');
+          }
+        }
+      });
+
+      // Docsify plugin hook for setup & route updates
+      window.$docsify = window.$docsify || {};
+      window.$docsify.plugins = (window.$docsify.plugins || []).concat(function (hook) {
+        hook.doneEach(function () {
+          injectNavbarSearch();
+          setupSearchObserver();
+        });
+      });
+
+      // Periodic check to ensure navbar search item persists across navbar rerenders
+      setInterval(injectNavbarSearch, 300);
+    })();
+  </script>
+</body>
+</html>

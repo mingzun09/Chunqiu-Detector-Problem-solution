@@ -162,6 +162,15 @@ c. 正确配置 boot hash（正常情况下会自动设置）。
 
 ## Root 权限与 SELinux 检测
 
+### kernelsu detected
+
+**检测方式：**
+检测KernelSU
+
+**解决办法：**
+可等待更新或者使用其他ROOT实现
+
+
 ### 存在模块修改春秋
 
 #### 检测方式
@@ -388,6 +397,22 @@ native 方法 `runRootManagerIntentChecks` —— 用 Intent / 包可见性（`<
 
 ## TEE 与密钥证明检测
 
+### Tee伪造3
+
+**检测方式：**
+在TEE损坏设备上使用了Tricky-Store模块模拟TEE行为被侦测
+
+**解决办法：**
+可等待模块更新修复或者搭配使用OhMyKeymint 模块，尝试解决
+
+### Tee伪造(2-c)
+
+**检测方式：**
+在TEE损坏设备上使用了TEESimulator/RS模块模拟TEE行为被侦测
+
+**解决办法：**
+可等待模块更新修复或者搭配使用OhMyKeymint模块，尝试解决
+
 ### TEE 伪造(2)
 
 #### 检测方式
@@ -586,6 +611,12 @@ Bootloader（ABL）解锁标志已被真实置位，系统放行未经签名校�
 
 ## 挂载与命名空间检测
 
+### Mount Detector(7)
+
+**解决办法：**
+检测到挂载推荐使用NoMount元模块或者按照检测提示对系统修改的模块尝试关闭解决
+
+
 ### mountinfo
 
 #### 检测方式
@@ -737,6 +768,21 @@ Magic Mount 对系统修改模块挂载生效
 
 暂时未知
 部分老内核可能出现此检测项，修复方法暂时未知。
+
+### 隐藏应用列表生效2
+
+**解决办法：**
+更新hma/hma_oss至最新版
+https://t.me/HideMyApplist/175
+https://t.me/buggychat/121613
+可考虑使用hma_uidfake解决此检测项：https://t.me/chunqiudetector/221941
+
+### 找到了HMA的堆栽处理
+
+**解决办法：**
+更新hma/hma_oss至最新版
+https://t.me/HideMyApplist/175
+https://t.me/buggychat/121613
 
 ### HMA或许存在
 
@@ -1054,6 +1100,15 @@ native 方法 `runFormalUsbDebuggingCheck`；静态产物中未见 `adb_enabled`
 ---
 
 ## 内核、属性与系统特征检测
+
+### LineageOS detection
+
+**检测方式：**
+正在运行LineageOS系统，会检测到很多有关属性特征
+
+**解决办法：**
+可尝试使用susfs（如果有）对检测到的特征数据进行隐藏伪装
+
 
 ### 无效的伪造信息(1)
 
