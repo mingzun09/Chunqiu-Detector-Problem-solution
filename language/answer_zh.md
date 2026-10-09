@@ -865,19 +865,18 @@ Magic Mount 对系统修改模块挂载生效
 
 **解决办法：**
 更新hma/hma_oss至最新版
-https://t.me/HideMyApplist/175
-https://t.me/buggychat/121613
-可考虑使用hma_uidfake解决此检测项：https://t.me/chunqiudetector/221941
+[HMA更新频道](https://t.me/HideMyApplist/175)
+[HMA_OSS更新频道](https://t.me/buggychat/121613)
+在HMA_oss中可限制其zygote权限“SHARED USER GID”&“APP ZYGOTE GID”尝试解决
+或者可考虑使用hma_uidfake解决此检测项：https://t.me/chunqiudetector/220831
 
 </details>
 
 <details><summary><b>找到了HMA的堆栽处理</b></summary>
 
 **解决办法：**
-更新hma/hma_oss至最新版
-https://t.me/HideMyApplist/175
-https://t.me/buggychat/121613
-
+[HMA更新频道](https://t.me/HideMyApplist/175)
+[HMA_OSS更新频道](https://t.me/buggychat/121613)
 </details>
 
 <details><summary><b>HMA或许存在</b></summary>
