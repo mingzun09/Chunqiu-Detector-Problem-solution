@@ -1,14 +1,13 @@
 # 春秋检测项解决方案（跟进最新版本）中文版
 
-> 核对版本：4.5.5(68) ｜ 最后更新：2026-09-13
+> 核对版本：4.6.0(73) ｜ 最后更新：2026-10-9
 > 致谢名单 / Credits：[致谢清单](/File/Doc/thanks.md) ｜ 仅供参考，具体结果因设备/环境而异。
 > 部分条目补充了「**检测方式**」（由社区实测与行为观察整理，可能与实现有偏差，仅供定位问题参考）
 > 文档链接：[github](https://github.com/mingzun09/Chunqiu-Detector-Problem-solution)
 
 ---
 
-## 声明
-
+<details><summary><b>## 声明</b></summary>
 **1. 合规与用途约束**
 春秋检测器及本文档提供的环境检测和处置方案，**仅面向 Android 技术爱好者**，专用于**技术学习、环境研究与探讨**。**严禁**将本文档中的任何方案用于绕过应用反作弊、规避风控机制、游戏作弊等一切违法违规场景。因违规使用而产生的任何后果与责任，均由使用者自行承担。
 
@@ -24,6 +23,8 @@
 6. 本文档新增的设备类型定义（真解锁设备、假回锁设备、免解设备、自签设备）为社区圈内首次规范化整理定义，旨在推动设备分类术语的统一使用；不具备法律层面权威性，仅作技术参考。
 
 7. 模块推荐列表内的模块均为编者主观技术推荐，不存在任何商业利益关联，仅供参考。
+
+</details>
 
 ## 说明与反馈
 
@@ -140,7 +141,7 @@ Bootloader（ABL）解锁标志已被真实置位，系统放行未经签名校�
 
 - 若设备 root 管理器自带元模块 API，可以考虑启用；
 - [Hybrid-Mount](https://github.com/Hybrid-Mount/meta-hybrid_mount)：比较广泛使用的第三方元模块。
-
+或推荐使用[NoMount](https://github.com/maxsteeel/nomount)适用于 Android 内核的 VFS（虚拟文件系统）路径重定向框架
 </details>
 
 <details><summary><b>模块正确配置</b></summary>
@@ -172,11 +173,8 @@ c. 正确配置 boot hash（正常情况下会自动设置）。
 
 <details><summary><b>kernelsu detected</b></summary>
 
-**检测方式：**
-检测KernelSU
-
 **解决办法：**
-可等待更新或者使用其他ROOT实现
+更新管理器至[最新CI](https://t.me/KernelSU_group/3234/497395)
 
 </details>
 
