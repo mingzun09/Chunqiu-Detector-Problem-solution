@@ -8,16 +8,10 @@
 
 👉 **[https://mingzun09.github.io/Chunqiu-Detector-Problem-solution/](https://mingzun09.github.io/Chunqiu-Detector-Problem-solution/)**
 
-The site is built with **VitePress**: a sidebar that collapses by category and lists every detection item, Chinese word-segmentation search, and dark/light themes.
-The document content is still maintained in this repository under `language/answer_zh.md` and `language/answer_en.md` (**no site files need editing** — the site rebuilds automatically after a commit).
+The site is built with **Docsify**: a simple and lightweight documentation site generator.
+The document content is maintained in this repository under `language/answer_zh.md` and `language/answer_en.md`.
 
-```bash
-npm install          # Install dependencies (Node 20+)
-npm run docs:dev     # Local preview at http://localhost:5173/Chunqiu-Detector-Problem-solution/
-npm run docs:build   # Build into docs/.vitepress/dist
-```
-
-> The site source lives in `docs/` (config at `docs/.vitepress/config.mts`). Before building, `scripts/prepare.mjs` automatically copies the `File/` attachments, converts both markdown files into pages with entry anchors injected, and generates the sidebar data.
+> The site source directly lives in the root directory and initializes via `index.html`.
 
 ---
 
