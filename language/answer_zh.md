@@ -63,6 +63,7 @@
 - [八、包管理、应用可见性与安装痕迹](#八包管理应用可见性与安装痕迹)
 - [九、时序、页驻留与差分侧信道](#九时序页驻留与差分侧信道)
 - [十、本地服务与终端形态](#十本地服务与终端形态)
+- [十一、社区实测补充（4.6.2，真机 + 逆向）](#十一社区实测补充462真机--逆向)
 - [附：未归入上述判据的词条](#附未归入上述判据的词条)
 - [附录](#附录)
 
@@ -1774,6 +1775,98 @@ iQoo/Vivo 用户注意：`/apex/com.android.virt/bin/su` 会被命中 → 移走
 检测 Pty。
 
 </details>
+
+## 十一、社区实测补充（4.6.2，真机 + 逆向）
+
+> 本节由设备实测与静态逆向整理，遵循本文档既有格式；**只补充「检测方式」与定位信息**，不改变原条目的结论。
+> 证据等级：E1 设备实测 / E2 设备只读 / E3 静态分析。样本 `com.chunqiunativecheck` 4.6.2 (75)。
+
+<details><summary><b>Found ksu/免解设备（检测方式补充）</b></summary>
+
+#### 检测方式
+
+**本地判定**，与服务端无关：飞行模式 + `pm clear` 清数据后仍稳定复现；上报报文为 ECIES 密文，App 自身也不解析响应作为判据。
+
+两个 native 判据：
+
+1. **SELinux policy oracle**：在 zygote 域执行 `check_access()`，查询命中 KSU 策略里才有的 subject/class（`ksu`、`ksu_file` 等）；
+2. **`/proc/fs/ext4` 的 loop 设备**：与紧随其后的 `KernelSU loop device: %1$s` 详情模板同源。
+
+实测边界（容易误判，务必注意）：
+
+- App **主进程**读不到 `/proc/fs/*`、selinuxfs、`/data/adb/*`、`/system/bin/su`；
+- 真正读到 `/proc/fs/*` 的是 **`:msi` / `:apd` 隔离服务**（它们继承 zygote 的命名空间）⇒ 验证必须在隔离服务域做，在主进程里测会得到假阴性；
+- 在 App 的 mount namespace 里把 `/data/adb` bind 成空目录后该条目**仍在**；`pm hide` 掉 KSU 管理器后该条目**仍在** ⇒ 与「`/data/adb` 是否存在」「管理器包是否可见」都无因果关系。
+
+#### 说明
+
+免解（late-load）栈上有一个**可定位的成因**：KernelSU 的 `selinux_hide` 特性默认关闭，且 late-load 流程里没有任何环节去打开它，于是用于「用 `backup_sepolicy` 回答 app-uid 策略查询」的钩子从未安装，oracle 读到的是真实（已被 KSU 改过的）策略。
+
+该问题已在上游提出：`KernelSU-Next/KernelSU-Next` **#1660**（Issue）/ **#1659**（PR，late-load 分支内自动启用 + 退避重试）。启用后可用 `dmesg | grep "selinux_hide"` 观察是否生效。
+
+</details>
+
+<details><summary><b>KernelSU loop device（检测方式补充）</b></summary>
+
+#### 检测方式
+
+读取 `/proc/fs/ext4` 下的 loop 设备条目并匹配 KernelSU 特征串；与 `Found ksu/免解设备` 属同一族，通常成对出现。
+
+#### 说明
+
+该通道的读取者同样主要是隔离服务。若要覆盖，需要让 `/proc/fs/ext4` 在**隔离服务域**也不可见（路径隐藏类方案），并在该域复验；只在主进程验证不算通过。
+
+</details>
+
+<details><summary><b>风险应用 / Risk apps（检测方式补充）</b></summary>
+
+#### 检测方式
+
+内置风险包名清单 + `QUERY_ALL_PACKAGES` 包查询。
+
+**通道已用实验证实**：执行 `pm hide <包名>` 后，该项列表立即少一个包；`pm unhide` 后恢复。⇒ 判据确实是包管理器查询结果，而不是目录扫描。
+
+#### 解决办法（补充）
+
+对被测应用隐藏相关包（隐藏应用列表类方案，作用域需覆盖被测应用及其子进程），或直接移除对应包。
+
+</details>
+
+<details><summary><b>异常进程（检测方式补充）</b></summary>
+
+#### 检测方式
+
+遍历 `/proc/<pid>/{cmdline,status,cgroup}`，与 root 守护进程名（`ksud`、`apd`、`su` 等）及 cgroup 归属做交叉；另与 auditd 的 AVC 记录交叉。
+
+#### 说明
+
+该条目的信号面分布在「进程名 / cgroup / 审计」三处，单独改一处通常不足以消除；建议先用 `ls -l /proc/<pid>/exe` 枚举实际被命中的进程，再决定动哪一处。
+
+</details>
+
+<details><summary><b>检测SELinux Policy时发现可疑问题（检测方式补充）</b></summary>
+
+#### 检测方式
+
+**双路径互证**：`libselinux check_access()` + 直接读写 selinuxfs，代码内带 `unsupported` / `mismatch` 诊断。
+
+因此只修一条路径会被另一条判为 `mismatch`，反而更显眼；且判据不是「读 `/sys/fs/selinux/policy` 文件」，对 policy 文件做路径隐藏对该条目无效。
+
+</details>
+
+<details><summary><b>SELinux 状态通道不一致（检测方式补充）</b></summary>
+
+#### 检测方式
+
+解析 `/sys/fs/selinux/status` 的 `sequence` / `policyload` 元数据，与内核真实状态比对。
+
+#### 说明
+
+免解（late-load）栈会重新发布策略，导致该元组与 stock boot 不同；用「伪造页」压成固定值（如 `0/0`）本身又构成另一处不一致。可行方向是让该页反映**真实且自洽**的启动序列，而不是硬编码常量。
+
+</details>
+
+---
 
 ## 附：未归入上述判据的词条
 
