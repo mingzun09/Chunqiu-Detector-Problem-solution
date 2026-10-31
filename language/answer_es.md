@@ -310,7 +310,7 @@ Palabras textuales del desarrollador: si aparece con el sistema de fábrica + mo
 
 <details><summary><b>Se detectó engaño en la versión del kernel: %1$s</b></summary>
 
-### Causa
+#### Causa
 Las cadenas de release de `uname(2)`, del subproceso `uname -r` y de `/proc/version` no coinciden entre sí
 
 Prueba a camuflar la versión del kernel con SUSFS u otros medios
@@ -355,7 +355,7 @@ Camuflar el nombre del kernel con SUSFS.
 
 <details><summary><b>ROM detected (a)</b></summary>
 
-## Causa
+#### Causa
 `vendor_sepolicy.cil` / `vendor_file_contexts` contienen `hal_lineage`, `hal_aospa`, `.lineage`, `.aospa`.
 
 Habitual en sistemas / ROM personalizados o portados; es solo una referencia para que el desarrollador mejore, no hay solución
@@ -507,7 +507,7 @@ Si salta nada más arrancar, en la mayoría de los casos es un error de la fase 
 
 <details><summary><b>Montaje anómalo</b></summary>
 
-## Causa
+#### Causa
 
 La ruta a la que apunta `("/proc/self/exe")` contradice el valor esperado en mountinfo
 
@@ -517,7 +517,7 @@ Examina los módulos de tipo montaje y prueba a cambiar el metamódulo para reso
 
 <details><summary><b>Vista de montaje inconsistente</b></summary>
 
-## Causa
+#### Causa
 Más o menos el mismo principio que la entrada anterior, pero la verificación con appzygote no coincide
 
 Examina los módulos de tipo montaje y prueba a cambiar el metamódulo para resolverlo
@@ -1170,12 +1170,10 @@ El criterio nativo tiene cuatro capas, pero **solo la primera decide el veredict
 
 1. **Escaneo de nombres de directorio**: recorre `/dev/binderfs`, `/dev`, `/sys/fs/selinux`, `/proc/self/fd`, `/apex`, `/system/framework`, `/data/misc`, `/data/system`, `/data/local/tmp`, `/storage/emulated/0/` y `/data/`, y activa la familia correspondiente en cuanto coincide una palabra clave:
 
-| Palabra clave (incluidas variantes de mayúsculas) | Familia | Campo en los detalles |
-|---|---|---|
-| `shamiko`, `Shamiko`, `内核`, `调度`, `suius`, `suidaemon`, `ssssss`, `suidaem` | Sui | `Sui` |
-| `sandhook`, `SandHook`, `sandcore` | SandHook | `SandHook` |
-| `pumpcin`, `Pumpcin`, `taiwan`, `Taiwan` | Pumpcin | `Pumpcin` / `Taiwan` |
-| `tricky`, `Tricky` | EDXposed | `EDXposed` |
+- **Sui**: `shamiko`, `Shamiko`, `内核`, `调度`, `suius`, `suidaemon`, `ssssss`, `suidaem` (campo en los detalles `Sui`)
+- **SandHook**: `sandhook`, `SandHook`, `sandcore` (campo en los detalles `SandHook`)
+- **Pumpcin**: `pumpcin`, `Pumpcin`, `taiwan`, `Taiwan` (campo en los detalles `Pumpcin` / `Taiwan`)
+- **EDXposed**: `tricky`, `Tricky` (campo en los detalles `EDXposed`)
 
 2. **Recuento de Binder**: si `/dev/binderfs` tiene más de 3 entradas de directorio se informa como Sui, sin mirar de qué servicio se trata;
 3. **Muestreo temporal**: 100 rondas por nombre sobre `lsposed` / `sui` / `sandhook` / `pumpcin`, ponderadas (100 / 50 / 30) según si existe `/dev/binderfs/<name>`, si el nombre aparece en `/proc/self/fd` y si aparece una línea en `/proc/net/unix`, para producir una relación;
@@ -1265,6 +1263,12 @@ Este elemento presenta inestabilidad
 ## VI. Política SELinux, AVC y canales de auditoría
 
 El criterio son las contradicciones internas entre los resultados de consulta de selinuxfs, las lecturas de la página status, las estadísticas avc y los registros de logcat/auditd.
+
+<details><summary><b>Abnormal Environment(k)</b></summary>
+
+Se resuelve actualizando el gestor a la última compilación CI.
+
+</details>
 
 <details><summary><b>Se encontraron problemas sospechosos al detectar la política SELinux / se detectaron permisos ROOT</b></summary>
 

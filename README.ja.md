@@ -66,7 +66,7 @@ python -m http.server 8000    # あるいは任意の静的サーバー（例: n
 
 完全な謝辞は **[`File/Doc/thanks.md`](File/Doc/thanks.md)** にあります。ドキュメント貢献者、特別謝辞、ツールと自動化を、それぞれコミット／PR の根拠付きで記載しています。
 
-- **ドキュメント貢献者:** 铭鐏 ([@mingzun09](https://github.com/mingzun09)) · [@YiJieqwq](https://github.com/YiJieqwq) · 741afb7 · huoyan1231 · juanma0511 · Young-Six-6 · HongSir6
+- **ドキュメント貢献者:** 铭鐏 ([@mingzun09](https://github.com/mingzun09)) · [@YiJieqwq](https://github.com/YiJieqwq) · 741afb7 · huoyan1231 · juanma0511 · Young-Six-6 · HongSir6 · Lljjcc625 · [Met-AUG](https://github.com/Met-AUG)
 - **特別謝辞:** [Matsuzaka Yuki](https://github.com/matsuzaka-yuki) · [JeTeeZnTmax](https://github.com/jeteezntmax)
 - **ツールと自動化:** google-labs-jules[bot]
 

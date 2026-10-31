@@ -66,7 +66,7 @@ python -m http.server 8000    # 或任意静态服务器，如 npx serve
 
 完整致谢清单见 **[`File/Doc/thanks.md`](File/Doc/thanks.md)** —— 文档贡献者、特别致谢与工具自动化，每条均附提交/PR 佐证。
 
-- **文档贡献者：** 铭鐏（[@mingzun09](https://github.com/mingzun09)）· [@YiJieqwq](https://github.com/YiJieqwq) · 741afb7 · huoyan1231 · juanma0511 · Young-Six-6 · HongSir6
+- **文档贡献者：** 铭鐏（[@mingzun09](https://github.com/mingzun09)）· [@YiJieqwq](https://github.com/YiJieqwq) · 741afb7 · huoyan1231 · juanma0511 · Young-Six-6 · HongSir6 · Lljjcc625 · [Met-AUG](https://github.com/Met-AUG)
 - **特别致谢：** [Matsuzaka Yuki](https://github.com/matsuzaka-yuki) · [JeTeeZnTmax](https://github.com/jeteezntmax)
 - **工具与自动化：** google-labs-jules[bot]
 

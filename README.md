@@ -66,7 +66,7 @@ You can fork and modify the repository, then open pull requests. I will check an
 
 Full attribution lives in **[`File/Doc/thanks.md`](File/Doc/thanks.md)** — documentation contributors, special thanks, and tooling, each with commit/PR evidence.
 
-- **Documentation contributors:** 铭鐏 ([@mingzun09](https://github.com/mingzun09)) · [@YiJieqwq](https://github.com/YiJieqwq) · 741afb7 · huoyan1231 · juanma0511 · Young-Six-6 · HongSir6
+- **Documentation contributors:** 铭鐏 ([@mingzun09](https://github.com/mingzun09)) · [@YiJieqwq](https://github.com/YiJieqwq) · 741afb7 · huoyan1231 · juanma0511 · Young-Six-6 · HongSir6 · Lljjcc625 · [Met-AUG](https://github.com/Met-AUG)
 - **Special thanks:** [Matsuzaka Yuki](https://github.com/matsuzaka-yuki) · [JeTeeZnTmax](https://github.com/jeteezntmax)
 - **Tools & automation:** google-labs-jules[bot]
 

@@ -5,17 +5,6 @@
   * [Solución en español](/language/answer_es.md)
   * [日本語の解決策](/language/answer_ja.md)
 
-* **快速分类 / Categories**
-  * [说明与反馈](#说明与反馈)
-  * [序章](#序章)
-  * [一、属性、构建信息与文本配置](#一属性构建信息与文本配置)
-  * [二、挂载视图与文件系统一致性](#二挂载视图与文件系统一致性)
-  * [三、进程、命名空间与权限状态](#三进程命名空间与权限状态)
-  * [四、内核接口直调与反调试 / 反注入行为](#四内核接口直调与反调试-反注入行为)
-  * [五、二进制与内存映射完整性](#五二进制与内存映射完整性)
-  * [六、SELinux 策略、AVC 与审计通道](#六selinux-策略avc-与审计通道)
-  * [七、Keystore / KeyMint / TEE](#七keystore-keymint-tee)
-  * [八、包管理、应用可见性与安装痕迹](#八包管理应用可见性与安装痕迹)
-  * [九、时序、页驻留与差分侧信道](#九时序页驻留与差分侧信道)
-  * [十、本地服务与终端形态](#十本地服务与终端形态)
-  * [附录](#附录)
+* **致谢 / Credits**
+  * [致谢名单 / Credits](/File/Doc/thanks.md)
+  * [GitHub 仓库](https://github.com/mingzun09/Chunqiu-Detector-Problem-solution)

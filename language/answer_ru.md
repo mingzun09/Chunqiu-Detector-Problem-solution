@@ -310,7 +310,7 @@ c. Корректно настройте boot hash (в нормальной си
 
 <details><summary><b>Обнаружен обман версии ядра: %1$s</b></summary>
 
-### Причина
+#### Причина
 Строки release из трёх источников — `uname(2)`, подпроцесс `uname -r`, `/proc/version` — не совпадают
 
 Попробуйте замаскировать версию ядра через SUSFS или другими средствами
@@ -355,7 +355,7 @@ c. Корректно настройте boot hash (в нормальной си
 
 <details><summary><b>ROM detected (a)</b></summary>
 
-## Причина
+#### Причина
 `vendor_sepolicy.cil` / `vendor_file_contexts` содержат `hal_lineage`, `hal_aospa`, `.lineage`, `.aospa`.
 
 Часто встречается на кастомных / портированных системах / ROM, приведено только для справки разработчикам для улучшения, решения нет
@@ -507,7 +507,7 @@ resetprop изменён.
 
 <details><summary><b>Аномальное монтирование</b></summary>
 
-## Причина
+#### Причина
 
 Путь, на который указывает `("/proc/self/exe")`, противоречит ожидаемому значению в mountinfo
 
@@ -517,7 +517,7 @@ resetprop изменён.
 
 <details><summary><b>Несогласованный вид монтирования</b></summary>
 
-## Причина
+#### Причина
 Принцип примерно как в предыдущей статье, но сверка с app zygote не совпадает
 
 Проверьте модули класса монтирования, попробуйте заменить метамодуль
@@ -1170,12 +1170,10 @@ Magic Mount действует на монтирование системоиз�
 
 1. **Сканирование имён каталогов**: обход `/dev/binderfs`, `/dev`, `/sys/fs/selinux`, `/proc/self/fd`, `/apex`, `/system/framework`, `/data/misc`, `/data/system`, `/data/local/tmp`, `/storage/emulated/0/` и `/data/`; при совпадении ключевого слова загорается соответствующая группа:
 
-| Ключевые слова (с вариантами регистра) | Группа | Поле в деталях |
-|---|---|---|
-| `shamiko`, `Shamiko`, `内核`, `调度`, `suius`, `suidaemon`, `ssssss`, `suidaem` | Sui | `Sui` |
-| `sandhook`, `SandHook`, `sandcore` | SandHook | `SandHook` |
-| `pumpcin`, `Pumpcin`, `taiwan`, `Taiwan` | Pumpcin | `Pumpcin` / `Taiwan` |
-| `tricky`, `Tricky` | EDXposed | `EDXposed` |
+- **Sui**: `shamiko`, `Shamiko`, `内核`, `调度`, `suius`, `suidaemon`, `ssssss`, `suidaem` (поле в деталях `Sui`)
+- **SandHook**: `sandhook`, `SandHook`, `sandcore` (поле в деталях `SandHook`)
+- **Pumpcin**: `pumpcin`, `Pumpcin`, `taiwan`, `Taiwan` (поле в деталях `Pumpcin` / `Taiwan`)
+- **EDXposed**: `tricky`, `Tricky` (поле в деталях `EDXposed`)
 
 2. **Подсчёт по Binder**: если в `/dev/binderfs` больше 3 элементов каталога, это трактуется как Sui, без разбора, какой именно это сервис;
 3. **Замер по времени**: по 100 циклов на каждое имя `lsposed` / `sui` / `sandhook` / `pumpcin`; наличие `/dev/binderfs/<name>`, совпадение имени в `/proc/self/fd` и совпадение строки в `/proc/net/unix` дают веса (100 / 50 / 30), из которых считается отношение;
@@ -1265,6 +1263,12 @@ ctime некоторого пути раньше момента выборки, 
 ## VI. Политики SELinux, AVC и канал аудита
 
 Критерий — самопротиворечия между результатами запросов к selinuxfs, показаниями страницы status, статистикой avc и записями logcat/auditd.
+
+<details><summary><b>Abnormal Environment(k)</b></summary>
+
+Решается обновлением менеджера до последней CI-сборки.
+
+</details>
 
 <details><summary><b>При проверке SELinux Policy обнаружены подозрительные проблемы / обнаружены ROOT-права</b></summary>
 

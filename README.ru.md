@@ -66,7 +66,7 @@ python -m http.server 8000    # или любой статический сер�
 
 Полный список — в **[`File/Doc/thanks.md`](File/Doc/thanks.md)**: авторы документации, особая благодарность и инструменты автоматизации, с подтверждением коммитами/PR.
 
-- **Авторы документации:** 铭鐏 ([@mingzun09](https://github.com/mingzun09)) · [@YiJieqwq](https://github.com/YiJieqwq) · 741afb7 · huoyan1231 · juanma0511 · Young-Six-6 · HongSir6
+- **Авторы документации:** 铭鐏 ([@mingzun09](https://github.com/mingzun09)) · [@YiJieqwq](https://github.com/YiJieqwq) · 741afb7 · huoyan1231 · juanma0511 · Young-Six-6 · HongSir6 · Lljjcc625 · [Met-AUG](https://github.com/Met-AUG)
 - **Особая благодарность:** [Matsuzaka Yuki](https://github.com/matsuzaka-yuki) · [JeTeeZnTmax](https://github.com/jeteezntmax)
 - **Инструменты и автоматизация:** google-labs-jules[bot]
 

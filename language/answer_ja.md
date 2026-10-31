@@ -310,7 +310,7 @@ SUSFS でカーネル名を偽装。
 
 <details><summary><b>カーネルバージョンの偽装を検出：%1$s</b></summary>
 
-### 原因
+#### 原因
 `uname(2)`、`uname -r` 子プロセス、`/proc/version` の三経路で release 文字列が一致しない
 
 SUSFS でカーネルバージョンを偽装するなどの手段を試す
@@ -355,7 +355,7 @@ SUSFS でカーネル名を偽装。
 
 <details><summary><b>ROM detected (a)</b></summary>
 
-## 原因
+#### 原因
 `vendor_sepolicy.cil` / `vendor_file_contexts` に `hal_lineage`、`hal_aospa`、`.lineage`、`.aospa` が含まれる。
 
 カスタム／移植システム／ROM でよく見られ、開発者の改善参考用であり、解決策はありません
@@ -507,7 +507,7 @@ Xiaomi 端末では通常、起動後にシステムの負荷が高いときに�
 
 <details><summary><b>異常マウント</b></summary>
 
-## 原因
+#### 原因
 
 `("/proc/self/exe")` が指すパスが mountinfo の期待値と矛盾している
 
@@ -517,7 +517,7 @@ Xiaomi 端末では通常、起動後にシステムの負荷が高いときに�
 
 <details><summary><b>マウントビューの不一致</b></summary>
 
-## 原因
+#### 原因
 上の項目と原理はほぼ同じだが、照合する appzygote が一致しない
 
 マウント系モジュールを切り分け、メタモジュールの交換で解決を試す
@@ -1171,12 +1171,10 @@ lsp、shizuku および一部の xp モジュールの改変検出について�
 
 1. **ディレクトリ名のスキャン**：`/dev/binderfs`、`/dev`、`/sys/fs/selinux`、`/proc/self/fd`、`/apex`、`/system/framework`、`/data/misc`、`/data/system`、`/data/local/tmp`、`/storage/emulated/0/`、`/data/` を走査し、キーワードが一致した時点で該当グループを点灯します：
 
-| キーワード（大小文字の変種を含む） | グループ | 詳細のフィールド |
-|---|---|---|
-| `shamiko`、`Shamiko`、`内核`、`调度`、`suius`、`suidaemon`、`ssssss`、`suidaem` | Sui | `Sui` |
-| `sandhook`、`SandHook`、`sandcore` | SandHook | `SandHook` |
-| `pumpcin`、`Pumpcin`、`taiwan`、`Taiwan` | Pumpcin | `Pumpcin` / `Taiwan` |
-| `tricky`、`Tricky` | EDXposed | `EDXposed` |
+- **Sui**：`shamiko`、`Shamiko`、`内核`、`调度`、`suius`、`suidaemon`、`ssssss`、`suidaem`（詳細のフィールド `Sui`）
+- **SandHook**：`sandhook`、`SandHook`、`sandcore`（詳細のフィールド `SandHook`）
+- **Pumpcin**：`pumpcin`、`Pumpcin`、`taiwan`、`Taiwan`（詳細のフィールド `Pumpcin` / `Taiwan`）
+- **EDXposed**：`tricky`、`Tricky`（詳細のフィールド `EDXposed`）
 
 2. **Binder の件数**：`/dev/binderfs` のディレクトリ項目が 3 を超えると Sui と判定します（どのサービスかは見ません）；
 3. **タイミングのサンプリング**：`lsposed` / `sui` / `sandhook` / `pumpcin` の各名前について 100 回ずつ、`/dev/binderfs/<name>` の有無、`/proc/self/fd` での名前一致、`/proc/net/unix` での行一致に重み（100 / 50 / 30）を掛けて比率を算出します；
@@ -1266,6 +1264,12 @@ Zygisk 実装モジュールをアップグレード(http://github.com/Dr-TSNG/Z
 ## 六、SELinux ポリシー、AVC と監査チャネル
 
 判定基準は selinuxfs の照会結果、status ページの読み値、avc 統計と logcat/auditd の記録の間の自己矛盾です。
+
+<details><summary><b>Abnormal Environment(k)</b></summary>
+
+最新の CI 版マネージャーに更新すると解決します。
+
+</details>
 
 <details><summary><b>SELinux Policy 検査時に不審な問題を検出 / ROOT 権限を検出</b></summary>
 

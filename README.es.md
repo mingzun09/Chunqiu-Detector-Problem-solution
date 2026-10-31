@@ -66,7 +66,7 @@ Puedes hacer fork del repositorio, modificarlo y abrir un Pull Request; lo revis
 
 La atribución completa está en **[`File/Doc/thanks.md`](File/Doc/thanks.md)**: colaboradores de la documentación, agradecimientos especiales y herramientas de automatización, cada uno con su evidencia de commit/PR.
 
-- **Colaboradores de la documentación:** 铭鐏 ([@mingzun09](https://github.com/mingzun09)) · [@YiJieqwq](https://github.com/YiJieqwq) · 741afb7 · huoyan1231 · juanma0511 · Young-Six-6 · HongSir6
+- **Colaboradores de la documentación:** 铭鐏 ([@mingzun09](https://github.com/mingzun09)) · [@YiJieqwq](https://github.com/YiJieqwq) · 741afb7 · huoyan1231 · juanma0511 · Young-Six-6 · HongSir6 · Lljjcc625 · [Met-AUG](https://github.com/Met-AUG)
 - **Agradecimientos especiales:** [Matsuzaka Yuki](https://github.com/matsuzaka-yuki) · [JeTeeZnTmax](https://github.com/jeteezntmax)
 - **Herramientas y automatización:** google-labs-jules[bot]
 

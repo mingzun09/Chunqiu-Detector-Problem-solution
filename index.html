@@ -23,7 +23,7 @@
       auto2top: true,
       loadNavbar: true,
       loadSidebar: true,
-      subMaxLevel: 3,
+      subMaxLevel: 0,
       alias: {
         '/.*/_navbar.md': '/_navbar.md',
         '/.*/_sidebar.md': '/_sidebar.md'
@@ -1043,10 +1043,17 @@
         return summary ? plain(summary.textContent) : '';
       }
 
+      function normText(s) {
+        return plain(String(s || '')).replace(/[\s\u3000]+/g, '').toLowerCase();
+      }
+
       function reveal(el) {
+        if (!el) return;
         if (el.tagName === 'DETAILS') el.open = true;
-        /* block:'start' + scroll-margin-top 让展开后的条目标题停在视口顶部附近 */
-        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        var box = el.closest ? el.closest('details') : null;
+        if (box) box.open = true;
+        var top = el.getBoundingClientRect().top + window.pageYOffset - 14;
+        window.scrollTo({ top: top < 0 ? 0 : top, behavior: 'smooth' });
         el.classList.remove('search-highlight');
         void el.offsetWidth;
         el.classList.add('search-highlight');
@@ -1055,12 +1062,12 @@
 
       function findEntry(index, title) {
         var list = Array.prototype.slice.call(document.querySelectorAll('.markdown-section details'));
-        var byIndex = list[index];
-        if (byIndex && summaryText(byIndex) === title) return byIndex;
+        var want = normText(title);
         for (var i = 0; i < list.length; i++) {
-          if (summaryText(list[i]) === title) return list[i];
+          if (normText(summaryText(list[i])) === want) return list[i];
         }
-        return null;
+        /* 文本没对上时退回按下标（仅在条目数与索引一致时有效） */
+        return list[index] || null;
       }
 
       function openEntry(index, title, attempt) {
@@ -1081,13 +1088,12 @@
 
       function openHeading(index, title) {
         var heads = Array.prototype.slice.call(document.querySelectorAll('.markdown-section h2'));
-        var target = heads[index];
-        if (!target || plain(target.textContent) !== title) {
-          target = null;
-          for (var i = 0; i < heads.length; i++) {
-            if (plain(heads[i].textContent) === title) { target = heads[i]; break; }
-          }
+        var want = normText(title);
+        var target = null;
+        for (var i = 0; i < heads.length; i++) {
+          if (normText(heads[i].textContent) === want) { target = heads[i]; break; }
         }
+        if (!target) target = heads[index] || null;
         if (target) reveal(target);
       }
 
@@ -1233,5 +1239,769 @@
       }, 400);
     })();
   </script>
+  <!-- ============================================================
+       UX 增强 / UX enhancements
+       1) 统一 docsify 的「标题 id」与「目录链接 slug」两套算法
+          （含 、： 的中文标题原来必然对不上，点击目录不滚动）
+       2) 条目卡片可跳转、可深链、可高亮
+       3) 返回顶部、全部展开/收起、侧栏滚动定位（scrollspy）
+       4) 表格横向滚动、长路径换行，避免移动端溢出
+       5) Ctrl/Cmd+K、/ 聚焦搜索，结果用上下键选择
+       ============================================================ -->
+  <style id="ux-style">
+    /* ---- 版面 ---- */
+    .markdown-section {
+      box-sizing: border-box;
+      width: auto;
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 30px 34px 140px;
+      line-height: 1.78;
+    }
+
+    .markdown-section > * {
+      max-width: 100%;
+    }
+
+    .markdown-section img,
+    .markdown-section video {
+      height: auto;
+    }
+
+    .markdown-section pre {
+      max-width: 100%;
+      overflow-x: auto;
+    }
+
+    .markdown-section h2 {
+      margin-top: 2.4em;
+      padding-bottom: .3em;
+      border-bottom: 1px solid rgba(128, 128, 128, .25);
+    }
+
+    .markdown-section h2:first-child {
+      margin-top: .4em;
+    }
+
+    .markdown-section h2,
+    .markdown-section h2 + p,
+    .markdown-section details {
+      scroll-margin-top: 14px;
+    }
+
+    .markdown-section p,
+    .markdown-section li,
+    .markdown-section td,
+    .markdown-section th,
+    .markdown-section summary {
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    .markdown-section code {
+      word-break: break-word;
+    }
+
+    /* ---- 表格：容器内横向滚动，不再撑破版面 ---- */
+    .md-table-wrap {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      margin: 14px 0;
+      border: 1px solid rgba(128, 128, 128, .28);
+      border-radius: 10px;
+    }
+
+    .md-table-wrap > table {
+      margin: 0;
+      border: 0;
+      min-width: 460px;
+      width: 100%;
+    }
+
+    .md-table-wrap th,
+    .md-table-wrap td {
+      padding: 8px 12px;
+      vertical-align: top;
+    }
+
+    .md-table-wrap thead th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    /* ---- 条目卡片 ---- */
+    .markdown-section details {
+      border: 1px solid rgba(128, 128, 128, .25);
+      border-radius: 12px;
+      margin: 10px 0;
+      padding: 2px 14px;
+      transition: border-color .18s ease, background-color .18s ease;
+    }
+
+    .markdown-section details:hover {
+      border-color: rgba(78, 203, 141, .5);
+    }
+
+    .markdown-section details > summary {
+      cursor: pointer;
+      padding: 10px 2px;
+      font-weight: 600;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      user-select: none;
+    }
+
+    .markdown-section details > summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .markdown-section details > summary::before {
+      content: "";
+      width: 0;
+      height: 0;
+      flex: 0 0 auto;
+      border-left: 6px solid #9aa4b1;
+      border-top: 5px solid transparent;
+      border-bottom: 5px solid transparent;
+      transition: transform .18s ease;
+      transform-origin: 25% 50%;
+    }
+
+    .markdown-section details[open] > summary::before {
+      transform: rotate(90deg);
+    }
+
+    .markdown-section details[open] {
+      padding-bottom: 10px;
+    }
+
+    /* ---- 跳转高亮 ---- */
+    .jump-flash {
+      animation: ux-flash 1.8s ease;
+    }
+
+    @keyframes ux-flash {
+      0% {
+        background-color: rgba(78, 203, 141, .22);
+      }
+
+      100% {
+        background-color: transparent;
+      }
+    }
+
+    /* ---- 返回顶部 ---- */
+    #ux-top {
+      position: fixed;
+      right: 18px;
+      bottom: 22px;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 1px solid rgba(128, 128, 128, .35);
+      background: #fff;
+      color: #444;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 8px 22px rgba(0, 0, 0, .16);
+      z-index: 30;
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    #ux-top.show {
+      display: flex;
+    }
+
+    #ux-top:hover {
+      color: #2f9e68;
+      border-color: rgba(78, 203, 141, .7);
+    }
+
+    /* ---- 侧栏工具条 ---- */
+    .ux-toolbar {
+      display: flex;
+      gap: 8px;
+      margin: 10px 2px 4px;
+    }
+
+    .ux-toolbar button {
+      flex: 1 1 0;
+      padding: 6px 8px;
+      font-size: 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(128, 128, 128, .35);
+      background: transparent;
+      color: inherit;
+      cursor: pointer;
+      transition: border-color .16s ease, color .16s ease;
+    }
+
+    .ux-toolbar button:hover {
+      border-color: rgba(78, 203, 141, .8);
+      color: #2f9e68;
+    }
+
+    /* ---- 阅读进度条 ---- */
+    #ux-progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 2px;
+      width: 0;
+      background: #4ecb8d;
+      z-index: 60;
+      transition: width .1s linear;
+    }
+
+    /* ---- 搜索结果键盘选中 ---- */
+    .matching-post.ux-active h2 {
+      color: #2f9e68;
+    }
+
+    /* ---- 侧栏当前章节 ---- */
+    .sidebar li.ux-current > a {
+      color: #2f9e68;
+      font-weight: 600;
+    }
+
+    /* 侧栏条目允许换行，避免长章节名被截断 */
+    .sidebar ul li a {
+      white-space: normal;
+      overflow: visible;
+      text-overflow: clip;
+      line-height: 1.45;
+      padding-top: 3px;
+      padding-bottom: 3px;
+    }
+
+    .sidebar li.ux-current > a::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 4px;
+      bottom: 4px;
+      width: 2px;
+      border-radius: 2px;
+      background: #4ecb8d;
+    }
+
+    /* ---- 侧栏「本页目录」 ---- */
+    .ux-toc {
+      margin-top: 16px;
+      padding: 12px 12px 28px;
+      border-top: 1px solid rgba(128, 128, 128, .22);
+    }
+
+    .ux-toc-title {
+      margin: 0 0 6px;
+      font-size: 12px;
+      letter-spacing: .05em;
+      color: #8a94a6;
+    }
+
+    .ux-toc ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .ux-toc li a {
+      display: block;
+      padding: 3px 0 3px 10px;
+      font-size: 13px;
+      line-height: 1.5;
+      border-left: 2px solid transparent;
+      color: inherit;
+    }
+
+    .ux-toc li.ux-current a {
+      color: #2f9e68;
+      font-weight: 600;
+      border-left-color: #4ecb8d;
+    }
+
+    @media screen and (max-width: 768px) {
+      .markdown-section {
+        padding: 18px 15px 120px;
+      }
+
+      #ux-top {
+        right: 12px;
+        bottom: 16px;
+      }
+
+      /* 左上角菜单按钮加底衬，避免和正文文字糊在一起 */
+      .sidebar-toggle {
+        border-radius: 50%;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, .16);
+        padding: 10px;
+        margin: 6px;
+      }
+
+      /* 右上角 GitHub 角标缩小，避免压住标题 */
+      .github-corner svg {
+        width: 56px;
+        height: 56px;
+      }
+
+      .markdown-section {
+        padding-top: 14px;
+      }
+
+      /* 手机上把顶部导航改成正常流式排列，避免绝对定位盖住标题 */
+      .app-nav {
+        position: static;
+        padding: 10px 14px 4px;
+      }
+
+      body .content {
+        padding-top: 0 !important;
+      }
+
+      .app-nav > ul {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 2px 16px;
+        margin: 0;
+        padding: 0;
+      }
+
+      .app-nav > ul > li {
+        float: none;
+        display: block;
+        margin: 0;
+      }
+
+      .app-nav li.nav-search-item {
+        flex: 1 0 100%;
+        margin: 0 0 6px;
+        order: -1;
+      }
+
+      .app-nav li.nav-search-item .nav-search-input {
+        width: 100%;
+      }
+
+      /* 手机上隐藏右上角 GitHub 角标（侧栏已有仓库入口），避免压住导航与标题 */
+      .github-corner {
+        display: none;
+      }
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .md-table-wrap {
+        border-color: var(--dk-border);
+      }
+
+      .md-table-wrap thead th {
+        background-color: var(--dk-bg-elevated);
+      }
+
+      .markdown-section details {
+        border-color: var(--dk-border);
+        background-color: var(--dk-bg-subtle);
+      }
+
+      .markdown-section details:hover {
+        border-color: rgba(78, 203, 141, .65);
+      }
+
+      .markdown-section details > summary {
+        color: var(--dk-heading);
+      }
+
+      #ux-top {
+        background: var(--dk-bg-elevated);
+        color: var(--dk-text);
+        border-color: var(--dk-border);
+      }
+
+      .ux-toolbar button {
+        border-color: var(--dk-border);
+        color: var(--dk-text);
+      }
+
+      .ux-toc {
+        border-top-color: var(--dk-border);
+      }
+
+      .ux-toc-title {
+        color: var(--dk-muted);
+      }
+
+      .ux-toc li.ux-current a {
+        color: var(--dk-accent);
+        border-left-color: var(--dk-accent);
+      }
+
+      .matching-post.ux-active h2 {
+        color: var(--dk-accent);
+      }
+    }
+  </style>
+
+  <script id="ux-script">
+    (function () {
+      'use strict';
+
+      var CJK = /[\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\u3040-\u30ff]/;
+
+      /* 与 docsify 生成目录链接 slug 时相同的规则：去标签 → 只留字母/数字/-/_/CJK
+         → 空白转 '-' → 连续 '-' 合并。用它统一标题 id，使目录/侧栏链接能够命中。 */
+      function linkSlug(text) {
+        var s = String(text || '').replace(/<[^>]*>/g, '');
+        var out = '';
+        for (var i = 0; i < s.length; i++) {
+          var ch = s.charAt(i);
+          if (ch === ' ' || ch === '\t' || ch === '\n' || ch === '\r') out += '-';
+          else if (/[0-9a-zA-Z\-_]/.test(ch) || CJK.test(ch)) out += ch.toLowerCase();
+        }
+        return out.replace(/-+/g, '-').replace(/^-|-$/g, '');
+      }
+
+      function textOf(el) {
+        return (el.textContent || '').replace(/\s+/g, ' ').trim();
+      }
+
+      function uniqueId(base, used) {
+        var id = base, n = 0;
+        while (used[id]) {
+          n += 1;
+          id = base + '-' + n;
+        }
+        used[id] = true;
+        return id;
+      }
+
+      /* 1) 标题 id 统一成链接 slug 规则 */
+      function syncHeadingIds() {
+        var used = {};
+        var heads = document.querySelectorAll('.markdown-section h1, .markdown-section h2, .markdown-section h3, .markdown-section h4, .markdown-section h5, .markdown-section h6');
+        for (var i = 0; i < heads.length; i++) {
+          var h = heads[i];
+          var base = linkSlug(textOf(h));
+          if (!base) continue;
+          var id = uniqueId(base, used);
+          if (h.id !== id) h.id = id;
+          var anchor = h.querySelector('a.anchor');
+          if (anchor) {
+            anchor.setAttribute('data-id', id);
+            anchor.setAttribute('href', '#/?id=' + encodeURIComponent(id));
+          }
+        }
+      }
+
+      /* 2) 目录 / 侧栏里的锚点链接按标题文本重新指向，绕开 docsify 自带的编号偏差 */
+      function syncAnchorLinks() {
+        var links = document.querySelectorAll('.markdown-section a[href*="?id="], .sidebar a[href*="?id="]');
+        var byText = {};
+        var heads = document.querySelectorAll('.markdown-section h1, .markdown-section h2, .markdown-section h3, .markdown-section h4, .markdown-section h5, .markdown-section h6');
+        for (var i = 0; i < heads.length; i++) {
+          var key = linkSlug(textOf(heads[i]));
+          if (key && !byText[key]) byText[key] = heads[i].id;
+        }
+        for (var j = 0; j < links.length; j++) {
+          var a = links[j];
+          var label = a.getAttribute('title') || textOf(a);
+          var slug = linkSlug(label);
+          var target = byText[slug];
+          if (!target) continue;
+          a.setAttribute('href', '#/?id=' + encodeURIComponent(target));
+        }
+      }
+
+      /* 3) 每个条目给一个稳定 id，便于深链与搜索定位 */
+      function tagEntries() {
+        var list = document.querySelectorAll('.markdown-section details');
+        for (var i = 0; i < list.length; i++) {
+          var d = list[i];
+          if (!d.id) d.id = 'entry-' + (i + 1);
+          var s = d.querySelector('summary');
+          if (s && !s.getAttribute('data-target')) s.setAttribute('data-target', d.id);
+        }
+      }
+
+      /* 4) 表格套滚动容器 */
+      function wrapTables() {
+        var tables = document.querySelectorAll('.markdown-section table');
+        for (var i = 0; i < tables.length; i++) {
+          var t = tables[i];
+          if (t.parentNode && t.parentNode.classList && t.parentNode.classList.contains('md-table-wrap')) continue;
+          var wrap = document.createElement('div');
+          wrap.className = 'md-table-wrap';
+          t.parentNode.insertBefore(wrap, t);
+          wrap.appendChild(t);
+        }
+      }
+
+      function flash(el) {
+        el.classList.remove('jump-flash');
+        void el.offsetWidth;
+        el.classList.add('jump-flash');
+        window.setTimeout(function () { el.classList.remove('jump-flash'); }, 1900);
+      }
+
+      function openAndScroll(el) {
+        if (!el) return false;
+        var box = el.closest ? el.closest('details') : null;
+        if (box) box.open = true;
+        if (el.tagName === 'DETAILS') el.open = true;
+        var top = el.getBoundingClientRect().top + window.pageYOffset - 14;
+        window.scrollTo({ top: top < 0 ? 0 : top, behavior: 'smooth' });
+        flash(el);
+        return true;
+      }
+
+      function resolveTarget(hash) {
+        if (!hash) return null;
+        var raw = hash.replace(/^#\/?/, '');
+        var q = raw.indexOf('?id=');
+        var id = q >= 0 ? raw.slice(q + 4) : (raw.indexOf('/') === -1 ? raw : '');
+        if (!id) return null;
+        try { id = decodeURIComponent(id); } catch (err) { /* keep raw */ }
+        var el = document.getElementById(id);
+        if (el) return el;
+        /* 兜底：按归一化文本找标题 */
+        var heads = document.querySelectorAll('.markdown-section h1, .markdown-section h2, .markdown-section h3, .markdown-section h4');
+        for (var i = 0; i < heads.length; i++) {
+          if (linkSlug(textOf(heads[i])) === linkSlug(id)) return heads[i];
+        }
+        return null;
+      }
+
+      /* 5) 站内锚点点击：自己滚动（带偏移），并同步 URL */
+      document.addEventListener('click', function (e) {
+        var a = e.target.closest ? e.target.closest('a[href*="?id="], a[href^="#/?"]') : null;
+        if (!a) return;
+        var href = a.getAttribute('href') || '';
+        if (href.indexOf('?id=') === -1) return;
+        var target = resolveTarget(href);
+        if (!target) return;
+        e.preventDefault();
+        e.stopPropagation();
+        openAndScroll(target);
+        var page = (window.location.hash || '').split('#')[1] || '';
+        var path = page.indexOf('?') >= 0 ? page.slice(0, page.indexOf('?')) : page;
+        try {
+          history.replaceState(null, '', window.location.pathname + window.location.search +
+            '#/' + (path || '') + '?id=' + encodeURIComponent(target.id));
+        } catch (err) { /* ignore */ }
+      }, true);
+
+      /* 6) 返回顶部 + 阅读进度 */
+      var topBtn = null;
+      var bar = null;
+
+      function ensureChrome() {
+        if (!topBtn) {
+          topBtn = document.createElement('button');
+          topBtn.id = 'ux-top';
+          topBtn.type = 'button';
+          topBtn.title = '回到顶部 / Back to top';
+          topBtn.setAttribute('aria-label', 'Back to top');
+          topBtn.innerHTML = '↑';
+          topBtn.addEventListener('click', function () {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          });
+          document.body.appendChild(topBtn);
+
+          bar = document.createElement('div');
+          bar.id = 'ux-progress';
+          document.body.appendChild(bar);
+        }
+        onScroll();
+      }
+
+      function onScroll() {
+        var y = window.pageYOffset || document.documentElement.scrollTop || 0;
+        if (topBtn) topBtn.classList.toggle('show', y > 600);
+        if (bar) {
+          var h = document.documentElement.scrollHeight - window.innerHeight;
+          bar.style.width = (h > 0 ? Math.min(100, (y / h) * 100) : 0) + '%';
+        }
+      }
+
+      window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', onScroll);
+
+      /* 7) 侧栏：全部展开 / 收起 + 本页目录 + 当前章节高亮 */
+      var TOC_LABEL = { zh: '本页目录', en: 'On this page', ru: 'На этой странице', es: 'En esta página', ja: 'このページの目次' };
+
+      function currentLang() {
+        var m = /answer_(zh|en|ru|es|ja)/.exec(window.location.hash || '');
+        return m ? m[1] : 'zh';
+      }
+
+      function buildSideToc() {
+        var sidebar = document.querySelector('.sidebar');
+        var nav = sidebar && sidebar.querySelector('.sidebar-nav');
+        if (!nav) return;
+        var old = nav.querySelector('.ux-toc');
+        if (old) old.remove();
+
+        var heads = document.querySelectorAll('.markdown-section h2');
+        if (!heads.length) return;
+
+        var box = document.createElement('div');
+        box.className = 'ux-toc';
+
+        var title = document.createElement('p');
+        title.className = 'ux-toc-title';
+        title.textContent = TOC_LABEL[currentLang()] || TOC_LABEL.zh;
+        box.appendChild(title);
+
+        var ul = document.createElement('ul');
+        for (var i = 0; i < heads.length; i++) {
+          var h = heads[i];
+          var li = document.createElement('li');
+          var a = document.createElement('a');
+          a.setAttribute('href', '#/?id=' + encodeURIComponent(h.id));
+          a.setAttribute('data-target', h.id);
+          a.textContent = textOf(h);
+          li.appendChild(a);
+          ul.appendChild(li);
+        }
+        box.appendChild(ul);
+        nav.appendChild(box);
+      }
+      function ensureToolbar() {
+        var sidebar = document.querySelector('.sidebar');
+        if (!sidebar || sidebar.querySelector('.ux-toolbar')) return;
+        var bar = document.createElement('div');
+        bar.className = 'ux-toolbar';
+        var open = document.createElement('button');
+        open.type = 'button';
+        open.textContent = '展开全部';
+        open.addEventListener('click', function () {
+          document.querySelectorAll('.markdown-section details').forEach(function (d) { d.open = true; });
+        });
+        var close = document.createElement('button');
+        close.type = 'button';
+        close.textContent = '收起全部';
+        close.addEventListener('click', function () {
+          document.querySelectorAll('.markdown-section details').forEach(function (d) { d.open = false; });
+        });
+        bar.appendChild(open);
+        bar.appendChild(close);
+        var nav = sidebar.querySelector('.sidebar-nav');
+        if (nav) sidebar.insertBefore(bar, nav);
+        else sidebar.appendChild(bar);
+      }
+
+      var spyLinks = [];
+      var spyBound = false;
+
+      function updateSpy() {
+        if (!spyLinks.length) return;
+        var y = (window.pageYOffset || 0) + 90;
+        var current = null;
+        var heads = document.querySelectorAll('.markdown-section h2');
+        for (var i = 0; i < heads.length; i++) {
+          if (heads[i].getBoundingClientRect().top + window.pageYOffset <= y) current = heads[i].id;
+        }
+        spyLinks.forEach(function (a) { a.parentNode && a.parentNode.classList.remove('ux-current'); });
+        if (!current) return;
+        spyLinks.forEach(function (a) {
+          if (a.getAttribute('data-target') === current ||
+            (a.getAttribute('href') || '').indexOf(encodeURIComponent(current)) !== -1) {
+            a.parentNode && a.parentNode.classList.add('ux-current');
+          }
+        });
+      }
+
+      function scrollSpy() {
+        spyLinks = Array.prototype.slice.call(document.querySelectorAll('.sidebar a[href*="?id="]'));
+        if (spyBound) {
+          updateSpy();
+          return;
+        }
+        spyBound = true;
+        var ticking = false;
+        window.addEventListener('scroll', function () {
+          if (ticking) return;
+          ticking = true;
+          window.requestAnimationFrame(function () { updateSpy(); ticking = false; });
+        }, { passive: true });
+        updateSpy();
+      }
+
+      /* 8) 任意页面渲染完成后统一处理 */
+      function enhance() {
+        enhance._ran = true;
+        tagEntries();
+        syncHeadingIds();
+        syncAnchorLinks();
+        wrapTables();
+        ensureToolbar();
+        buildSideToc();
+        scrollSpy();
+        ensureChrome();
+        openDeepLinkedEntry();
+      }
+
+      function openDeepLinkedEntry() {
+        var hash = window.location.hash || '';
+        if (hash.indexOf('entry-') === -1) return;
+        var target = resolveTarget(hash);
+        if (target && target.tagName === 'DETAILS' && !target.open) {
+          target.open = true;
+          var top = target.getBoundingClientRect().top + window.pageYOffset - 14;
+          window.scrollTo({ top: top < 0 ? 0 : top });
+        }
+      }
+
+      /* Ctrl/Cmd+K 或 / 聚焦搜索框 */
+      document.addEventListener('keydown', function (e) {
+        var tag = (e.target.tagName || '').toLowerCase();
+        var typing = tag === 'input' || tag === 'textarea' || e.target.isContentEditable;
+        var slash = e.key === '/' && !typing && !e.ctrlKey && !e.metaKey && !e.altKey;
+        var combo = (e.key === 'k' || e.key === 'K') && (e.ctrlKey || e.metaKey);
+        if (!slash && !combo) return;
+        var input = document.querySelector('.nav-search-input') || document.querySelector('.sidebar .search-input');
+        if (!input) return;
+        e.preventDefault();
+        input.focus();
+        input.select();
+      });
+
+      /* 搜索结果上下键选择 */
+      document.addEventListener('keydown', function (e) {
+        var tag = (e.target.tagName || '').toLowerCase();
+        if (tag !== 'input') return;
+        if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+        var panel = e.target.closest('.nav-search-item') ? document.querySelector('.nav-search-dropdown')
+          : document.querySelector('.sidebar .results-panel');
+        if (!panel || !panel.classList.contains('show')) return;
+        var items = Array.prototype.slice.call(panel.querySelectorAll('.matching-post'));
+        if (!items.length) return;
+        e.preventDefault();
+        var at = items.findIndex(function (el) { return el.classList.contains('ux-active'); });
+        at = e.key === 'ArrowDown' ? Math.min(items.length - 1, at + 1) : Math.max(0, at - 1);
+        items.forEach(function (el) { el.classList.remove('ux-active'); });
+        items[at].classList.add('ux-active');
+        items[at].scrollIntoView({ block: 'nearest' });
+      });
+
+      window.$docsify = window.$docsify || {};
+      window.$docsify.plugins = (window.$docsify.plugins || []).concat(function (hook) {
+        hook.doneEach(function () {
+          window.setTimeout(enhance, 0);
+        });
+      });
+
+      if (document.readyState !== 'loading') window.setTimeout(enhance, 0);
+      else document.addEventListener('DOMContentLoaded', function () { window.setTimeout(enhance, 0); });
+    })();
+  </script>
+
 </body>
+</html>
 </html>

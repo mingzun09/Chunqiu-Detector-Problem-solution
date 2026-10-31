@@ -53,17 +53,17 @@
 
 - [说明与反馈](#说明与反馈)
 - [序章](#序章)
-- [一、属性、构建信息与文本配置](#一属性构建信息与文本配置)
-- [二、挂载视图与文件系统一致性](#二挂载视图与文件系统一致性)
-- [三、进程、命名空间与权限状态](#三进程命名空间与权限状态)
-- [四、内核接口直调与反调试 / 反注入行为](#四内核接口直调与反调试-反注入行为)
-- [五、二进制与内存映射完整性](#五二进制与内存映射完整性)
-- [六、SELinux 策略、AVC 与审计通道](#六selinux-策略avc-与审计通道)
-- [七、Keystore / KeyMint / TEE](#七keystore-keymint-tee)
-- [八、包管理、应用可见性与安装痕迹](#八包管理应用可见性与安装痕迹)
-- [九、时序、页驻留与差分侧信道](#九时序页驻留与差分侧信道)
-- [十、本地服务与终端形态](#十本地服务与终端形态)
-- [附：未归入上述判据的词条](#附未归入上述判据的词条)
+- [一、属性、构建信息与文本配置](#一、属性、构建信息与文本配置)
+- [二、挂载视图与文件系统一致性](#二、挂载视图与文件系统一致性)
+- [三、进程、命名空间与权限状态](#三、进程、命名空间与权限状态)
+- [四、内核接口直调与反调试 / 反注入行为](#四、内核接口直调与反调试--反注入行为)
+- [五、二进制与内存映射完整性](#五、二进制与内存映射完整性)
+- [六、SELinux 策略、AVC 与审计通道](#六、selinux-策略、avc-与审计通道)
+- [七、Keystore / KeyMint / TEE](#七、keystore--keymint--tee)
+- [八、包管理、应用可见性与安装痕迹](#八、包管理、应用可见性与安装痕迹)
+- [九、时序、页驻留与差分侧信道](#九、时序、页驻留与差分侧信道)
+- [十、本地服务与终端形态](#十、本地服务与终端形态)
+- [附：未归入上述判据的词条](#附：未归入上述判据的词条)
 - [附录](#附录)
 
 ---
@@ -310,7 +310,7 @@ native 方法 `runFormalUsbDebuggingCheck`；静态产物中未见 `adb_enabled`
 
 <details><summary><b>检测到内核版本欺骗：%1$s</b></summary>
 
-### 原因
+#### 原因
 `uname(2)`、`uname -r` 子进程、`/proc/version` 三路 release 字符串不一致
 
 尝试使用SUSFS伪装内核版本或其他手段
@@ -355,7 +355,7 @@ native 方法 `runFormalUsbDebuggingCheck`；静态产物中未见 `adb_enabled`
 
 <details><summary><b>ROM detected (a)</b></summary>
 
-## 原因
+#### 原因
 `vendor_sepolicy.cil` / `vendor_file_contexts` 含 `hal_lineage`、`hal_aospa`、`.lineage`、`.aospa`。
 
 常见于自定义/移植系统/ROM上，仅供开发者参考改进，无解决方案
@@ -507,7 +507,7 @@ resetprop 被修改。
 
 <details><summary><b>异常挂载</b></summary>
 
-## 原因
+#### 原因
 
 `("/proc/self/exe")` 指向路径的与 mountinfo 中预期值存在矛盾
 
@@ -517,7 +517,7 @@ resetprop 被修改。
 
 <details><summary><b>挂载视图不一致</b></summary>
 
-## 原因
+#### 原因
 与上词条原理差不多，但校对appzygote不一致
 
 排查挂载类模块，尝试更换元模块解决
@@ -1170,12 +1170,10 @@ native 判据分四层，但**只有第一层参与裁决**：
 
 1. **目录名扫描**：遍历 `/dev/binderfs`、`/dev`、`/sys/fs/selinux`、`/proc/self/fd`、`/apex`、`/system/framework`、`/data/misc`、`/data/system`、`/data/local/tmp`、`/storage/emulated/0/`、`/data/`，命中关键词即点亮对应族：
 
-| 关键词（含大小写变体） | 归类 | 详情里的字段 |
-|---|---|---|
-| `shamiko`、`Shamiko`、`内核`、`调度`、`suius`、`suidaemon`、`ssssss`、`suidaem` | Sui | `Sui` |
-| `sandhook`、`SandHook`、`sandcore` | SandHook | `SandHook` |
-| `pumpcin`、`Pumpcin`、`taiwan`、`Taiwan` | Pumpcin | `Pumpcin` / `Taiwan` |
-| `tricky`、`Tricky` | EDXposed | `EDXposed` |
+- **Sui**：`shamiko`、`Shamiko`、`内核`、`调度`、`suius`、`suidaemon`、`ssssss`、`suidaem`（详情字段 `Sui`）
+- **SandHook**：`sandhook`、`SandHook`、`sandcore`（详情字段 `SandHook`）
+- **Pumpcin**：`pumpcin`、`Pumpcin`、`taiwan`、`Taiwan`（详情字段 `Pumpcin` / `Taiwan`）
+- **EDXposed**：`tricky`、`Tricky`（详情字段 `EDXposed`）
 
 2. **Binder 计数**：`/dev/binderfs` 目录项数 > 3 时判为 Sui，不区分具体是哪个服务；
 3. **时序采样**：对 `lsposed` / `sui` / `sandhook` / `pumpcin` 各采样 100 轮，按 `/dev/binderfs/<name>` 是否存在、`/proc/self/fd` 名字命中、`/proc/net/unix` 行命中加权（100 / 50 / 30）算出一个比值；
@@ -1266,7 +1264,7 @@ native 判据分四层，但**只有第一层参与裁决**：
 
 判据是 selinuxfs 查询结果、status 页读数、avc 统计与 logcat/auditd 记录之间的自相矛盾。
 
-＜details><summary><b>Abnormal Environment(k)</b></summary>
+<details><summary><b>Abnormal Environment(k)</b></summary>
 
 更新最新CI管理器解决
 

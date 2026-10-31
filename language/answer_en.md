@@ -310,7 +310,7 @@ The developer's own words: if this appears on a stock system in LKM mode, it is 
 
 <details><summary><b>Kernel version spoofing detected: %1$s</b></summary>
 
-### Root cause
+#### Root cause
 `uname(2)`, the `uname -r` subprocess, and `/proc/version` give three inconsistent release strings
 
 Try using SUSFS to spoof the kernel version or other means
@@ -355,7 +355,7 @@ Spoof the kernel name with SUSFS.
 
 <details><summary><b>ROM detected (a)</b></summary>
 
-## Root cause
+#### Root cause
 `vendor_sepolicy.cil` / `vendor_file_contexts` contain `hal_lineage`, `hal_aospa`, `.lineage`, `.aospa`.
 
 Commonly seen on custom / ported systems / ROMs; for developers' reference to improve only, no solution
@@ -506,7 +506,7 @@ A hit right after boot is mostly a snapshot-timing error: **wait 20 seconds to 5
 
 <details><summary><b>Abnormal mount</b></summary>
 
-## Root cause
+#### Root cause
 
 The path that `("/proc/self/exe")` points to contradicts the expected value in mountinfo
 
@@ -516,7 +516,7 @@ Troubleshoot mount-type modules, try changing the metamodule
 
 <details><summary><b>Inconsistent mount view</b></summary>
 
-## Root cause
+#### Root cause
 Much the same principle as the previous entry, but the appzygote verification is inconsistent
 
 Troubleshoot mount-type modules, try changing the metamodule
@@ -1169,12 +1169,10 @@ The native criteria have four layers, but **only the first one decides the verdi
 
 1. **Directory-name scan**: walks `/dev/binderfs`, `/dev`, `/sys/fs/selinux`, `/proc/self/fd`, `/apex`, `/system/framework`, `/data/misc`, `/data/system`, `/data/local/tmp`, `/storage/emulated/0/` and `/data/`, lighting up the matching family as soon as a keyword is hit:
 
-| Keyword (case variants included) | Family | Field in the details |
-|---|---|---|
-| `shamiko`, `Shamiko`, `内核`, `调度`, `suius`, `suidaemon`, `ssssss`, `suidaem` | Sui | `Sui` |
-| `sandhook`, `SandHook`, `sandcore` | SandHook | `SandHook` |
-| `pumpcin`, `Pumpcin`, `taiwan`, `Taiwan` | Pumpcin | `Pumpcin` / `Taiwan` |
-| `tricky`, `Tricky` | EDXposed | `EDXposed` |
+- **Sui**: `shamiko`, `Shamiko`, `内核`, `调度`, `suius`, `suidaemon`, `ssssss`, `suidaem` (detail field `Sui`)
+- **SandHook**: `sandhook`, `SandHook`, `sandcore` (detail field `SandHook`)
+- **Pumpcin**: `pumpcin`, `Pumpcin`, `taiwan`, `Taiwan` (detail field `Pumpcin` / `Taiwan`)
+- **EDXposed**: `tricky`, `Tricky` (detail field `EDXposed`)
 
 2. **Binder count**: `/dev/binderfs` holding more than 3 directory entries is reported as Sui, without looking at which service it is;
 3. **Timing sample**: 100 rounds per name over `lsposed` / `sui` / `sandhook` / `pumpcin`, weighted (100 / 50 / 30) by whether `/dev/binderfs/<name>` exists, a name hit in `/proc/self/fd` and a line hit in `/proc/net/unix`, to produce a ratio;
@@ -1264,6 +1262,12 @@ This item is unstable
 ## 6. SELinux Policy, AVC & Audit Channel
 
 The criteria are the self-contradictions between selinuxfs query results, status page readings, avc statistics and logcat/auditd records.
+
+<details><summary><b>Abnormal Environment(k)</b></summary>
+
+Update your manager to the latest CI build to solve it.
+
+</details>
 
 <details><summary><b>Suspicious problem found while checking SELinux Policy / ROOT permission detected</b></summary>
 
