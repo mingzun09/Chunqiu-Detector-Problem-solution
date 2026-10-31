@@ -1242,7 +1242,8 @@ KSU 免解（越狱）模式特征，或发现 ksu 相关进程 / 设备（热�
 判据是 selinuxfs 查询结果、status 页读数、avc 统计与 logcat/auditd 记录之间的自相矛盾。
 
 ＜details><summary><b>Abnormal Environment(k)</b></summary>
-## 更新最新CI管理器解决
+
+更新最新CI管理器解决
 
 </details>
 
