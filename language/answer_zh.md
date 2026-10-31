@@ -1164,6 +1164,31 @@ KSU 免解（越狱）模式特征，或发现 ksu 相关进程 / 设备（热�
 
 关于 lsp, shizuku 还有一些 xp 模块的修改检测。
 
+#### 检测方式（4.6.2 实测补充）
+
+native 判据分四层，但**只有第一层参与裁决**：
+
+1. **目录名扫描**：遍历 `/dev/binderfs`、`/dev`、`/sys/fs/selinux`、`/proc/self/fd`、`/apex`、`/system/framework`、`/data/misc`、`/data/system`、`/data/local/tmp`、`/storage/emulated/0/`、`/data/`，命中关键词即点亮对应族：
+
+| 关键词（含大小写变体） | 归类 | 详情里的字段 |
+|---|---|---|
+| `shamiko`、`Shamiko`、`内核`、`调度`、`suius`、`suidaemon`、`ssssss`、`suidaem` | Sui | `Sui` |
+| `sandhook`、`SandHook`、`sandcore` | SandHook | `SandHook` |
+| `pumpcin`、`Pumpcin`、`taiwan`、`Taiwan` | Pumpcin | `Pumpcin` / `Taiwan` |
+| `tricky`、`Tricky` | EDXposed | `EDXposed` |
+
+2. **Binder 计数**：`/dev/binderfs` 目录项数 > 3 时判为 Sui，不区分具体是哪个服务；
+3. **时序采样**：对 `lsposed` / `sui` / `sandhook` / `pumpcin` 各采样 100 轮，按 `/dev/binderfs/<name>` 是否存在、`/proc/self/fd` 名字命中、`/proc/net/unix` 行命中加权（100 / 50 / 30）算出一个比值；
+4. **汇总**：第 1 步任一关键词命中（计数 > 0）即返回命中，第 3 步得出的比值不参与判定。
+
+三个实测要点：
+
+- 第 3 步的比值只计算、不与阈值比较，所以 `/proc/net/unix`、`fd` 这两路只影响详情输出，不影响是否命中；
+- 详情里的 `LSPosed:` 恒为 `NO`（该位没有任何来源可以置位），命中 LSPosed 实际走的是 `tricky` → `EDXposed` 一路；
+- `/dev/binderfs` 条目数 > 3 这条最容易误报：常规设备除 `binder-control` 外常带多个节点，很容易到 4 个。排查时先看 `Sui:` 是否为唯一的 `YES`，是的话单独怀疑这一条。
+
+清理：`/data/local/tmp/` 下的 `sandhook*`、`pumpcin*`、`shamiko`、`suidaemon`、`suius` 一类目录/文件属模块卸载后的残留，删掉后重启复扫多数会消失（本条判的是“残留物证”，不是“服务正在运行”）。
+
 </details>
 
 <details><summary><b>[Hook] Suspicious library injection</b></summary>

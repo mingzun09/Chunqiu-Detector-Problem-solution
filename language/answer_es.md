@@ -888,6 +888,13 @@ La clonación de apps a veces puede hacer que esta solución de detección deje 
 
 Puede haber falsos positivos
 
+
+#### Método de detección (ampliado con pruebas de 4.6.2)
+
+El criterio nativo es un **escaneo de grupos de procesos dentro del cgroup más agrupación por PPID**: primero se enumera la pertenencia de los procesos al cgroup y luego se agrupan en conjuntos padre/hijo por `PPid`; en cuanto un grupo presenta una pertenencia anómala (proceso padre, uid o nivel de cgroup que no coincide con lo esperado), se **emite una línea** `proceso anómalo %1$s` **por cada `tgid` anómalo** de ese grupo.
+
+Por eso un mismo escaneo puede producir varias entradas consecutivas del mismo grupo; `%1$s` procede del nombre de proceso o del cmdline de cada `tgid` (cadena vacía si no se puede leer). Renombrar el proceso o ocultar un solo directorio de cgroup normalmente no elimina el grupo entero; al revalidar hay que comprobar que `Tgid`, `PPid` y la pertenencia al cgroup sean coherentes entre sí.
+
 </details>
 
 <details><summary><b>Anomalía en Zygote</b></summary>
@@ -1030,6 +1037,16 @@ Se detecta que KSU está en **modo sin desbloqueo (jailbreak)**, o se detectan f
 
 No se recomienda usar el **modo sin desbloqueo (jailbreak)**, por lo que no se ofrece solución.
 
+
+#### Método de detección (ampliado con pruebas de 4.6.2)
+
+El criterio de 4.6.2 son dos anomalías de estado dentro del propio proceso; basta cualquiera de las dos:
+
+- `getppid() > 5000`: un proceso de app normal debería tener como padre un system zygote creado al principio del arranque, con un pid normalmente muy inferior a 5000; un pid de padre demasiado alto indica que el padre no es el zygote esperado, algo típico de una inyección o de un cambio de padre;
+- `Seccomp: 0` en `/proc/self/status`: un proceso de app normal debería ejecutarse bajo el filtro seccomp (el campo suele ser `2`); `0` significa que el filtrado está desactivado.
+
+Este elemento es un **veredicto local**: se sigue reproduciendo en modo avión tras `pm clear`. Ni `pm hide` del gestor de KSU, ni montar `/data/adb` como directorio vacío dentro del mount namespace de la app, ni ocultar `/proc/fs` cambian este elemento ⇒ lee el estado del propio proceso y de su padre, y no depende del gestor de paquetes, del contenido de `/data/adb` ni de los dispositivos loop de `/proc/fs`. `KernelSU loop device`, más abajo, es un detalle aparte.
+
 </details>
 
 <details><summary><b>KernelSU loop device</b></summary>
@@ -1042,6 +1059,17 @@ Se detectó KSU
 
 Actualiza tu gestor y vuelve a parchear
 Actualiza el gestor y vuelve a parchear; o desactiva / cambia el metamódulo (como Hybrid-Mount, ver «Módulos recomendados» en el Prólogo).
+
+
+#### Método de detección (ampliado con pruebas de 4.6.2)
+
+El criterio es que **jbd2 y ext4 coincidan a la vez**:
+
+1. enumerar `/proc/fs/jbd2` y buscar entradas con la forma `loop*-8` (es decir, entradas de journal ext4 sobre un dispositivo loop);
+2. a cada coincidencia, quitarle el sufijo `-8` para obtener `<dev>` y confirmar que también existe `/proc/fs/ext4/<dev>`;
+3. solo si se cumplen ambas se imprime `KernelSU loop device: %1$s`, donde `%1$s` es el nombre del dispositivo.
+
+Ver `loopN` solo bajo `/proc/fs/ext4` no basta para este detalle; si en `/proc/fs/jbd2` solo hay entradas que no son loop, como `sdc*`, tampoco se cumple. El proceso principal normalmente no puede ver `/proc/fs`, así que la revalidación debe hacerse en un servicio aislado o en el dominio zygote que sí pueda leer esa vista de montaje.
 
 </details>
 
@@ -1135,6 +1163,31 @@ El puntero no está dentro del mapeo de libart.so o está vacío
 — En nombres de directorio, fd de Binder o `/proc/net/unix` aparecen marcas como lsposed/sui/sandhook/pumpcin, etc. (restos de módulos)
 
 Detección de modificaciones de lsp, shizuku y algunos módulos xp.
+
+#### Método de detección (ampliado con pruebas de 4.6.2)
+
+El criterio nativo tiene cuatro capas, pero **solo la primera decide el veredicto**:
+
+1. **Escaneo de nombres de directorio**: recorre `/dev/binderfs`, `/dev`, `/sys/fs/selinux`, `/proc/self/fd`, `/apex`, `/system/framework`, `/data/misc`, `/data/system`, `/data/local/tmp`, `/storage/emulated/0/` y `/data/`, y activa la familia correspondiente en cuanto coincide una palabra clave:
+
+| Palabra clave (incluidas variantes de mayúsculas) | Familia | Campo en los detalles |
+|---|---|---|
+| `shamiko`, `Shamiko`, `内核`, `调度`, `suius`, `suidaemon`, `ssssss`, `suidaem` | Sui | `Sui` |
+| `sandhook`, `SandHook`, `sandcore` | SandHook | `SandHook` |
+| `pumpcin`, `Pumpcin`, `taiwan`, `Taiwan` | Pumpcin | `Pumpcin` / `Taiwan` |
+| `tricky`, `Tricky` | EDXposed | `EDXposed` |
+
+2. **Recuento de Binder**: si `/dev/binderfs` tiene más de 3 entradas de directorio se informa como Sui, sin mirar de qué servicio se trata;
+3. **Muestreo temporal**: 100 rondas por nombre sobre `lsposed` / `sui` / `sandhook` / `pumpcin`, ponderadas (100 / 50 / 30) según si existe `/dev/binderfs/<name>`, si el nombre aparece en `/proc/self/fd` y si aparece una línea en `/proc/net/unix`, para producir una relación;
+4. **Agregación**: cualquier coincidencia de palabra clave del paso 1 (recuento > 0) devuelve positivo; la relación del paso 3 nunca participa en el veredicto.
+
+Tres puntos que conviene saber de las pruebas:
+
+- La relación del paso 3 solo se calcula y nunca se compara con un umbral, así que los canales `/proc/net/unix` y `fd` solo alimentan el texto de los detalles, no el hecho de que el elemento salte;
+- `LSPosed:` en los detalles siempre es `NO` (nada activa ese bit), de modo que un positivo de LSPosed llega en realidad por la vía `tricky` → `EDXposed`;
+- La regla de «más de 3 entradas en `/dev/binderfs`» es la que más falsos positivos produce: además de `binder-control`, los dispositivos normales llevan varios nodos y llegan a 4 con facilidad. Al investigar, comprueba primero si `Sui:` es el único `YES` y solo entonces sospecha de esta regla.
+
+Limpieza: los directorios y archivos como `sandhook*`, `pumpcin*`, `shamiko`, `suidaemon` y `suius` bajo `/data/local/tmp/` son restos de un módulo desinstalado; borrarlos y volver a escanear tras reiniciar suele eliminar el elemento (aquí se juzga el «resto probatorio», no que «el servicio esté en marcha»).
 
 </details>
 
@@ -1255,6 +1308,18 @@ El criterio son las contradicciones internas entre los resultados de consulta de
 *La recopilación de las soluciones anteriores se ha complementado a partir del [PR #45 upstream de 741afb7](https://github.com/mingzun09/Chunqiu-Detector-Problem-solution/pull/45); las notas de compatibilidad se mantienen tal como las aportó esa contribución y no han sido verificadas de forma independiente en un dispositivo real por este sitio.*
 
 Relación: `Familia de huellas del estado de SELinux`, `canal de estado de SELinux inconsistente`, `el dispositivo obtiene permisos Root / módulo anómalo` pertenecen a la misma familia de criterios (distintas caras en distintas versiones) y **este documento las ha fusionado en esta entrada**.
+
+
+#### Método de detección (ampliado con pruebas de 4.6.2)
+
+Lo esencial es **leer y escribir raw selinuxfs directamente dentro de AppZygote** y cruzar varios grupos de lecturas. Cualquiera de estas anomalías entra en este elemento:
+
+- **Grupos de control / control negativo**: tomando el context actual de `app_zygote` como origen, se establecen un control positivo que debe permitirse, un control negativo que debe denegarse y un control de fichero; cualquier grupo cuyo resultado sea el contrario al esperado es anómalo;
+- **Campos de la página status**: se leen `version`, `enforcing`, `sequence`, `policyload`, etc. de `/sys/fs/selinux/status`; un valor o una combinación que no encaje (por ejemplo `enforcing` distinto de 1, o saltos en `sequence`/`policyload`) es anómalo;
+- **access seqno**: se escriben consultas directamente en `/sys/fs/selinux/access` y se valida el `avdSeqNo`/`seqno` que devuelve el kernel; si el seqno no avanza, la escritura de vuelta es incoherente o una consulta repetida cambia de respuesta, es anómalo;
+- **Coherencia de contextos inválidos**: las consultas negativas con source/target/class/perm inexistentes deberían devolver `EINVAL`; si un context inválido se trata como normal y recibe una decisión allow/deny, o si raw selinuxfs y libselinux no coinciden, es anómalo.
+
+El criterio se apoya en la coherencia de las lecturas de `access` / `status`, no en el contenido del fichero `/sys/fs/selinux/policy`; el proceso principal normalmente no puede leer selinuxfs, así que la revalidación debe hacerse en `app_zygote` / dominio zygote.
 
 </details>
 
@@ -1596,6 +1661,16 @@ Lee los nombres de directorio bajo `/storage/emulated/0/Android/data/` para obte
 - Combinación eficaz: **modo de lista negra del módulo de ocultación de apps + solución de corrección de la lectura de ancho cero** ([FuseFixer](https://github.com/5ec1cff/FuseFixer)); en algunos modelos, tras activar el ámbito el dispositivo puede quedarse colgado en el arranque; basta con desactivarlo en modo seguro;
 - Si solo quieres que pase este elemento del detector Chunqiu: en el módulo de ocultación de apps, activa «limitar permisos de zygote» para el detector Chunqiu, todo activado menos `INET_GID`;
 - En este tipo de entradas cuyo medio de determinación se desconoce, también se puede usar el módulo de ocultación de apps para ocultar las apps sospechosas al detector.
+
+
+#### Método de detección (ampliado con pruebas de 4.6.2)
+
+4.6.2 compara la tabla interna de paquetes de riesgo por dos canales a la vez:
+
+- `pm list packages`: interpreta los nombres de paquetes instalados que devuelve el gestor de paquetes;
+- `/sdcard/Android/data/<paquete>`: enumera los nombres de directorios de datos externos y compara `<paquete>` con la tabla de riesgo; los nombres de directorio que llevan caracteres de ancho cero (como U+200B / U+200C / U+200D / U+FEFF) también se normalizan, así que los caracteres de ancho cero ya no sirven para sortearlo.
+
+Tras `pm hide <paquete>` el paquete desaparece de la lista de riesgo, lo que solo demuestra que el **canal del gestor de paquetes** se ve afectado — no permite concluir que el canal de directorios no exista; al contrario, borrar `/sdcard/Android/data/<paquete>` solo suprime el **canal de directorios**, y `pm list packages` puede seguir acertando.
 
 </details>
 

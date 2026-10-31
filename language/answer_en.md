@@ -8,7 +8,6 @@
 ---
 
 <details><summary><b>Disclaimer</b></summary>
-
 **1. Compliance and scope of use**
 Chunqiu Detector and the environment-detection and remediation solutions provided in this document are **intended only for Android technology enthusiasts**, and are dedicated solely to **technical study, environment research and discussion**. It is **strictly forbidden** to use any solution in this document to bypass app anti-cheat, evade risk-control mechanisms, cheat in games, or for any other illegal or non-compliant scenario. Any consequences and liability arising from non-compliant use are borne solely by the user.
 
@@ -888,6 +887,13 @@ Dual-app (cloning) can sometimes make this detection method ineffective, but it 
 
 There will be false positives
 
+
+#### Detection method (added from 4.6.2 testing)
+
+The native criterion is a **process-group scan inside cgroups plus PPID clustering**: it first enumerates process membership in the cgroup, then groups the processes into parent/child sets by `PPid`; as soon as one group holds an anomalous membership (parent process, uid or cgroup level not as expected), it **emits one** `abnormal process %1$s` **per anomalous `tgid`** of that group.
+
+A single scan can therefore produce several consecutive entries from the same group; `%1$s` comes from each `tgid`'s process name or cmdline (an empty string when neither can be read). Renaming the process alone, or hiding a single cgroup directory alone, usually does not clear the whole group; when re-testing, check that `Tgid`, `PPid` and the cgroup membership are mutually consistent.
+
 </details>
 
 <details><summary><b>Zygote abnormal</b></summary>
@@ -1030,6 +1036,16 @@ KSU is found to be in **No-Unlock (jailbreak) mode**, or ksu-related processes w
 
 **No-Unlock (jailbreak) mode** is not recommended, therefore no solution is provided.
 
+
+#### Detection method (added from 4.6.2 testing)
+
+The 4.6.2 criterion is two in-process state anomalies; either one alone is a hit:
+
+- `getppid() > 5000`: a normal app process should have a system zygote created early in boot as its parent, with a pid usually far below 5000; a too-large parent pid means the parent is not the expected zygote, typical for injection or re-parenting;
+- `Seccomp: 0` in `/proc/self/status`: a normal app process should run under the seccomp filter (the field is usually `2`); `0` means filtering is off.
+
+The item is a **local verdict**: it still reproduces in airplane mode after `pm clear`. Hiding the KSU manager with `pm hide`, binding `/data/adb` to an empty directory inside the app's mount namespace, or hiding `/proc/fs` — none of them changes this item ⇒ it reads the process's own state and its parent's, and does not depend on the package manager, the contents of `/data/adb` or the loop devices in `/proc/fs`. `KernelSU loop device` below is a separate detail.
+
 </details>
 
 <details><summary><b>KernelSU loop device</b></summary>
@@ -1042,6 +1058,17 @@ KSU detected
 
 Update your manager and re-patch
 Update the manager and re-patch; or turn off / change the metamodule (e.g. Hybrid-Mount, see "Related module recommendations" in the Prologue).
+
+
+#### Detection method (added from 4.6.2 testing)
+
+The criterion is **jbd2 and ext4 hitting at the same time**:
+
+1. enumerate `/proc/fs/jbd2` and match entries shaped like `loop*-8` (ext4 journal entries on a loop device);
+2. for each match, strip the `-8` suffix to get `<dev>` and confirm `/proc/fs/ext4/<dev>` also exists;
+3. only when both hold is `KernelSU loop device: %1$s` printed, where `%1$s` is the device name.
+
+Seeing `loopN` under `/proc/fs/ext4` alone is not enough for this detail; `/proc/fs/jbd2` holding only non-loop entries such as `sdc*` does not qualify either. The main process usually cannot see `/proc/fs`, so re-testing should be done in an isolated service or the zygote domain that can read that mount view.
 
 </details>
 
@@ -1135,6 +1162,31 @@ The pointer is not inside the libart.so mapping or is null
 — markers such as lsposed/sui/sandhook/pumpcin appear in directory names, Binder fd, `/proc/net/unix` (module residue)
 
 Also detection of modifications by lsp, shizuku and some xp modules.
+
+#### Detection method (added from 4.6.2 testing)
+
+The native criteria have four layers, but **only the first one decides the verdict**:
+
+1. **Directory-name scan**: walks `/dev/binderfs`, `/dev`, `/sys/fs/selinux`, `/proc/self/fd`, `/apex`, `/system/framework`, `/data/misc`, `/data/system`, `/data/local/tmp`, `/storage/emulated/0/` and `/data/`, lighting up the matching family as soon as a keyword is hit:
+
+| Keyword (case variants included) | Family | Field in the details |
+|---|---|---|
+| `shamiko`, `Shamiko`, `内核`, `调度`, `suius`, `suidaemon`, `ssssss`, `suidaem` | Sui | `Sui` |
+| `sandhook`, `SandHook`, `sandcore` | SandHook | `SandHook` |
+| `pumpcin`, `Pumpcin`, `taiwan`, `Taiwan` | Pumpcin | `Pumpcin` / `Taiwan` |
+| `tricky`, `Tricky` | EDXposed | `EDXposed` |
+
+2. **Binder count**: `/dev/binderfs` holding more than 3 directory entries is reported as Sui, without looking at which service it is;
+3. **Timing sample**: 100 rounds per name over `lsposed` / `sui` / `sandhook` / `pumpcin`, weighted (100 / 50 / 30) by whether `/dev/binderfs/<name>` exists, a name hit in `/proc/self/fd` and a line hit in `/proc/net/unix`, to produce a ratio;
+4. **Aggregation**: any keyword hit from step 1 (count > 0) returns a hit; the ratio from step 3 never takes part in the verdict.
+
+Three points worth knowing from testing:
+
+- The ratio from step 3 is only computed, never compared against a threshold, so the `/proc/net/unix` and `fd` channels only feed the details output, not whether the item fires;
+- `LSPosed:` in the details is always `NO` (nothing ever sets that bit), so an LSPosed hit actually arrives through `tricky` → `EDXposed`;
+- The "more than 3 entries in `/dev/binderfs`" rule is the likeliest to false-positive: besides `binder-control`, ordinary devices carry several nodes and easily reach 4. When investigating, first check whether `Sui:` is the only `YES`, and only then suspect this rule.
+
+Cleanup: directories/files such as `sandhook*`, `pumpcin*`, `shamiko`, `suidaemon` and `suius` under `/data/local/tmp/` are residue from a removed module; deleting them and re-scanning after a reboot usually clears the item (the criterion here is "leftover evidence", not "the service is running").
 
 </details>
 
@@ -1255,6 +1307,18 @@ The criteria are the self-contradictions between selinuxfs query results, status
 *The above solution was additionally compiled from [741afb7's upstream PR #45](https://github.com/mingzun09/Chunqiu-Detector-Problem-solution/pull/45); the compatibility notes follow that contribution and are not independently verified on real devices by this site.*
 
 Relationship: `SELinux state fingerprint suspicious`, `SELinux state channel inconsistent` and `Device obtained Root permission / abnormal module` belong to the same criteria family (different facets in different versions); **this document has merged them into this entry**.
+
+
+#### Detection method (added from 4.6.2 testing)
+
+The core is **reading and writing raw selinuxfs directly inside AppZygote** and cross-checking several groups of readings. Any of the following anomalies lands in this item:
+
+- **Control groups / negative control**: using the current `app_zygote` context as the source, set up a positive control that must be allowed, a negative control that must be denied and a file control; a group whose result is the opposite of expectation is anomalous;
+- **status page fields**: read `version`, `enforcing`, `sequence`, `policyload` etc. from `/sys/fs/selinux/status`; a value or combination that does not fit (e.g. `enforcing` not 1, or `sequence`/`policyload` jumping) is anomalous;
+- **access seqno**: write queries straight to `/sys/fs/selinux/access` and validate the `avdSeqNo`/`seqno` the kernel writes back; a seqno that does not advance, an inconsistent write-back, or a repeated query changing its answer is anomalous;
+- **invalid-context consistency**: issue negative queries with non-existent source/target/class/perm, which should return `EINVAL`; if an invalid context is treated as a normal one and gets an allow/deny decision, or raw selinuxfs and libselinux disagree, it is anomalous.
+
+The criterion rests on the consistency of the readings from `access` / `status`, not on the contents of `/sys/fs/selinux/policy`; the main process usually cannot read selinuxfs, so re-testing should be done in `app_zygote` / the zygote domain.
 
 </details>
 
@@ -1596,6 +1660,16 @@ Read the directory names under `/storage/emulated/0/Android/data/` to obtain ins
 - Effective combination: **App-hiding module blacklist mode + zero-width read fix** ([FuseFixer](https://github.com/5ec1cff/FuseFixer)); on some models, enabling the scope may cause a boot hang — just turn it off in safe mode;
 - If you only want this one Chunqiu item to pass: in the App-hiding module, turn on "restrict zygote permissions" for Chunqiu Detector, with everything on except `INET_GID`;
 - For entries like this where the judgement means are unknown, you can also use an App-hiding module to hide the suspicious app from the detector.
+
+
+#### Detection method (added from 4.6.2 testing)
+
+4.6.2 matches the built-in risky-package table through two channels at once:
+
+- `pm list packages`: parses the installed package names returned by the package manager;
+- `/sdcard/Android/data/<package>`: enumerates external data directory names and compares `<package>` against the risky table; directory names carrying zero-width characters (such as U+200B / U+200C / U+200D / U+FEFF) are normalised as well, so zero-width characters are no longer a way around it.
+
+After `pm hide <package>` the package disappears from the risky list, which only proves the **package-manager channel** was affected — it does not mean the directory channel is absent; conversely, deleting `/sdcard/Android/data/<package>` only suppresses the **directory channel**, and `pm list packages` can still hit.
 
 </details>
 
