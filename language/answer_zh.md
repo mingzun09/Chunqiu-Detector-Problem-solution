@@ -888,6 +888,13 @@ Magic Mount 对系统修改模块挂载生效
 
 会有误报现象
 
+
+#### 检测方式（4.6.2 实测补充）
+
+native 判据是 **cgroup 内进程组扫描 + PPID 聚类**：先枚举 cgroup 中的进程归属，再按 `PPid` 将进程聚成父子组；同一进程组内一旦出现异常归属（父进程、uid 或 cgroup 层级与预期不符），会对该组内每个异常 `tgid` **逐个生成一条** `异常进程 %1$s`。
+
+所以同一次扫描可能连续出现多个同组条目，`%1$s` 取自各 `tgid` 的进程名或 cmdline（取不到时为空串）。只改进程名或只隐藏单个 cgroup 目录，通常不会消掉整组；复验时应同时检查 `Tgid`、`PPid` 与 cgroup 归属是否自洽。
+
 </details>
 
 <details><summary><b>Zygote 存在异常</b></summary>
@@ -1030,6 +1037,16 @@ KSU 免解（越狱）模式特征，或发现 ksu 相关进程 / 设备（热�
 
 不推荐使用**免解（越狱）模式**，因此不提供解决方案。
 
+
+#### 检测方式（4.6.2 实测补充）
+
+4.6.2 的判据是进程内两项状态异常，满足任一即命中：
+
+- `getppid() > 5000`：正常 App 进程的父进程应是启动早期创建、pid 通常远低于 5000 的 system zygote；父 pid 过大说明父进程并非预期 zygote，常见于注入或重定父进程；
+- `/proc/self/status` 中 `Seccomp: 0`：正常 App 进程应在 seccomp 过滤模式下运行（该字段通常为 `2`）；为 `0` 表示过滤未启用。
+
+该条为**本地判定**：飞行模式 + `pm clear` 后仍可复现。`pm hide` 掉 KSU 管理器、在 App 的 mount namespace 里把 `/data/adb` bind 成空目录、隐藏 `/proc/fs`，都不会改变该条 ⇒ 它读取的是进程自身与父进程状态，不依赖包管理器、`/data/adb` 内容或 `/proc/fs` 的 loop 设备。下方 `KernelSU loop device` 是另一条独立详情。
+
 </details>
 
 <details><summary><b>KernelSU loop device</b></summary>
@@ -1042,6 +1059,17 @@ KSU 免解（越狱）模式特征，或发现 ksu 相关进程 / 设备（热�
 
 更新你的管理器并重新修补
 更新管理器并重新修补；或关闭/更换元模块（如 Hybrid-Mount，见序章「相关模块推荐」）。
+
+
+#### 检测方式（4.6.2 实测补充）
+
+判据是 **jbd2 与 ext4 两处同时命中**：
+
+1. 枚举 `/proc/fs/jbd2`，匹配形如 `loop*-8` 的条目（即 loop 设备上的 ext4 日志项）；
+2. 对每个匹配项去掉 `-8` 后缀得到 `<dev>`，确认 `/proc/fs/ext4/<dev>` 同时存在；
+3. 两者同时成立才输出 `KernelSU loop device: %1$s`，`%1$s` 为对应设备名。
+
+只在 `/proc/fs/ext4` 下看到 `loopN` 不足以命中本详情；`/proc/fs/jbd2` 里只有 `sdc*` 等非 loop 条目时也不成立。主进程通常看不到 `/proc/fs`，复验应在能读取该挂载视图的隔离服务或 zygote 域进行。
 
 </details>
 
@@ -1260,6 +1288,18 @@ KSU 免解（越狱）模式特征，或发现 ksu 相关进程 / 设备（热�
 *以上方案补充整理自 [741afb7 的上游 PR #45](https://github.com/mingzun09/Chunqiu-Detector-Problem-solution/pull/45)；兼容性说明沿用该贡献，并非本站独立真机验证。*
 
 关系：`SELinux 状态指纹可疑`、`SELinux 状态通道不一致`、`设备获取 Root 权限 / 异常模块` 属于同一套判据族（不同版本的不同切面），**本文档已合并到本条**。
+
+
+#### 检测方式（4.6.2 实测补充）
+
+核心是 **AppZygote 内直接读写 raw selinuxfs**，并让多组读数互相校验。以下任一项出现异常都会归入本条：
+
+- **控制组 / 负控**：以当前 `app_zygote` 的 context 为源，设置应放行的正控、应拒绝的负控以及文件控制；任一组结果与预期相反即异常；
+- **status 页字段**：读取 `/sys/fs/selinux/status` 的 `version`、`enforcing`、`sequence`、`policyload` 等字段；字段值或组合不符合预期（如 `enforcing` 非 1、`sequence/policyload` 跳变）即异常；
+- **access seqno**：直接向 `/sys/fs/selinux/access` 写入查询并校验内核回填的 `avdSeqNo`/`seqno`；seqno 不前进、回填不一致或重复查询结果变化即异常；
+- **无效上下文一致性**：用不存在的 source/target/class/perm 做负向查询，正常应返回 `EINVAL`；若无效上下文被当成正常上下文给出 allow/deny 决策，或 raw selinuxfs 与 libselinux 的结果不一致，即异常。
+
+判据落在 `access` / `status` 的读数一致性上，而不是读取 `/sys/fs/selinux/policy` 文件内容；主进程通常读不到 selinuxfs，复验应在 `app_zygote` / zygote 域进行。
 
 </details>
 
@@ -1601,6 +1641,16 @@ native 方法 `runRootManagerIntentChecks` —— 用 Intent / 包可见性（`<
 - 有效组合：**应用隐藏模块黑名单模式 + 零宽读取修复方案**（[FuseFixer](https://github.com/5ec1cff/FuseFixer)）；部分机型开启作用域后可能卡开机，安全模式关掉即可；
 - 只想让春秋这一项通过：在应用隐藏模块里对检测春秋检测打开「限制 zygote 权限」，除 `INET_GID` 外全开；
 - 这类判定手段未知的条目，也可用应用隐藏模块把可疑应用对检测器隐藏。
+
+
+#### 检测方式（4.6.2 实测补充）
+
+4.6.2 同时使用两条通道匹配内置风险包名表：
+
+- `pm list packages`：解析包管理器返回的已安装包名；
+- `/sdcard/Android/data/<包名>`：枚举外部数据目录名，按 `<包名>` 与风险表比对；目录名中夹入零宽字符（如 U+200B / U+200C / U+200D / U+FEFF）时也会做归一化处理，不能靠零宽字符绕过。
+
+`pm hide <包名>` 后该包从风险列表消失，只证明**包管理器通道**生效，不能据此推断目录通道不存在；反之，删掉 `/sdcard/Android/data/<包名>` 也只压掉**目录通道**，`pm list packages` 仍可命中。
 
 </details>
 
