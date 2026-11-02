@@ -1665,7 +1665,7 @@ native 方法 `runRootManagerIntentChecks` —— 用 Intent / 包可见性（`<
 - 有效组合：**应用隐藏模块黑名单模式 + 零宽读取修复方案**（[FuseFixer](https://github.com/5ec1cff/FuseFixer)）；部分机型开启作用域后可能卡开机，安全模式关掉即可；
 - 只想让春秋这一项通过：在应用隐藏模块里对检测春秋检测打开「限制 zygote 权限」，除 `INET_GID` 外全开；
 - 这类判定手段未知的条目，也可用应用隐藏模块把可疑应用对检测器隐藏。
-
+- 具体操作教程可参考：https://www.coolapk1s.com/feed/74811869
 
 #### 检测方式（4.6.2 实测补充）
 
@@ -1724,6 +1724,7 @@ iQoo/Vivo 用户注意：`/apex/com.android.virt/bin/su` 会被命中 → 移走
 [HMA_OSS更新频道](https://t.me/buggychat/121613)
 刷入此模块解决[fgetpriority](https://t.me/buggychat/135951?single)
 如果是隐藏应用列表生效，那请关闭对春秋检测的“伪装安装来源”
+- 具体解决操作参考：https://www.coolapk1s.com/feed/74811646
 </details>
 
 <details><summary><b>找到了HMA的堆栽处理</b></summary>
