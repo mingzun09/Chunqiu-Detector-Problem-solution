@@ -2121,3 +2121,7 @@ TRICKY_DATA="/data/adb/tricky_store"
 - `ro.product.brand=`
 
 </details>
+
+---
+
+> Этот документ распространяется по лицензии [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/deed.ru): требуется указание авторства и ссылки на оригинал, производные работы — под той же лицензией.

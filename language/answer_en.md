@@ -2120,3 +2120,7 @@ System paths such as `/proc`, `/sys`, `/dev`, `/system` are objects the detector
 - `ro.product.brand=`
 
 </details>
+
+---
+
+> This document is licensed under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/): attribution and a link to the original are required, and adaptations must be shared under the same license.

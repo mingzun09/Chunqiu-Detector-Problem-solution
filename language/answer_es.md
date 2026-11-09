@@ -2121,3 +2121,7 @@ Rutas del sistema como `/proc`, `/sys`, `/dev`, `/system` son objetos que el det
 - `ro.product.brand=`
 
 </details>
+
+---
+
+> Este documento se distribuye bajo la licencia [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/deed.es): se exige atribución y enlace al original y las adaptaciones deben compartirse bajo la misma licencia.

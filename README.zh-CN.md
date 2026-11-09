@@ -74,6 +74,20 @@ python -m http.server 8000    # 或任意静态服务器，如 npx serve
 
 ---
 
+## 许可证
+
+本仓库的文档、文档站与脚本采用 **[CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/deed.zh-hans)**（署名—相同方式共享 4.0 国际）授权，许可证全文见 [`LICENSE`](LICENSE)。
+
+你可以自由复制、翻译、改编与转载，但须满足：
+
+- **署名**：注明来源为本仓库，写明「铭鐏（[@mingzun09](https://github.com/mingzun09)）与贡献者」，并保留指向原文的链接；
+- **相同方式共享**：修改后的版本须以同一许可证发布。
+
+> `File/Bin/` 下的 KPM 模块、`File/rkp-release-v10.apk` 等第三方文件版权归原作者，沿用其各自许可（如 EULA），不适用本许可证。
+> 本仓库早期以 MIT 授权贡献的内容，其署名与原始授权声明继续适用于对应部分（见[致谢清单](File/Doc/thanks.md)）。
+
+---
+
 ## 维护者
 
 - [@mingzun09](https://github.com/mingzun09) — 仓库所有者

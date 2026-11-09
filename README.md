@@ -74,6 +74,20 @@ Full attribution lives in **[`File/Doc/thanks.md`](File/Doc/thanks.md)** — doc
 
 ---
 
+## License
+
+The documentation, the Docsify site and the helper scripts in this repository are licensed under **[CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)** (Attribution-ShareAlike 4.0 International). The full legal code is in [`LICENSE`](LICENSE).
+
+You may copy, translate, adapt and repost the material, provided that you:
+
+- **Attribute** — credit "铭鐏 ([@mingzun09](https://github.com/mingzun09)) and contributors", link back to this repository, and indicate changes;
+- **Share alike** — release any modified version under the same license.
+
+> Third-party files such as the KPM module under `File/Bin/` and `File/rkp-release-v10.apk` remain the property of their authors and keep their own licenses (e.g. an EULA); they are not covered by this license.
+> Material contributed earlier under the MIT license keeps its attribution and original licence notice for those parts (see the [credits](File/Doc/thanks.md)).
+
+---
+
 ## Maintainers
 
 - [@mingzun09](https://github.com/mingzun09) — repository owner

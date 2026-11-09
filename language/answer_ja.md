@@ -2121,3 +2121,7 @@ Widevine（`MediaDrm`）が `securityLevel = L1` を報告し、`openSession()` 
 - `ro.product.brand=`
 
 </details>
+
+---
+
+> 本文書は [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/deed.ja) で提供されます。出典と原文へのリンクの表示が必要で、改変版は同じライセンスで公開する必要があります。

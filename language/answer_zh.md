@@ -2122,3 +2122,7 @@ Widevine（`MediaDrm`）报告 `securityLevel = L1`、`openSession()` 抛 `NotPr
 - `ro.product.brand=`
 
 </details>
+
+---
+
+> 本文档采用 [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/deed.zh-hans) 许可：转载须署名并保留原文链接，改编作品须以相同许可发布。
