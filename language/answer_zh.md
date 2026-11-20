@@ -1235,9 +1235,15 @@ native 判据分四层，但**只有第一层参与裁决**：
 
 #### 检测方式
 
-页驻留 / 软脏位类探针（`clear_refs`、`smaps`、`MADV_COLD`），用于发现隐藏或异常映射。
+NativeTest `FindMemory` 的移植（探针 `detectNtMemArgvFrameworkOdex`），在**本进程内只读 `/proc/self/maps`**，按位返回（`4` / `8` / `16`），任一项命中即上报：
 
-清除检测器数据后若还存在，那么请开 Issues 并提供你的模块列表信息以及使用了哪些 xp 模块，我有时间会研究的。
+1. `framework.jar` 映射的 inode 与 `stat("/system/framework/framework.jar")` 的 inode 不一致（说明该段映射来自另一个文件）；
+2. `argv[0]` 指针槽前第 7 个指针位置（8 字节）等于 `/debug_r` 或 `try\0…`，用于发现 `/debug_ramdisk` 的栈残留（固定偏移启发式）；
+3. 路径含本应用包名、后缀为 `.odex/.oat/.vdex` 的文件中出现 `inline-max-code-units=0`、`inline-depth-limit=0`、`no-inline-from=`、`disable-inlining`（带/不带 `--`）等 dex2oat 参数残留。
+
+本项**不读 `smaps`、不写 `clear_refs`、不使用 `MADV_COLD`**；这类页驻留 / 软脏位探针属于另一项检查（见「Miscellaneous Check(12)」）。
+
+清除检测器数据后若还存在，那么请开 Issues 并提供你的模块列表信息、使用了哪些 xp 模块，以及 `getprop dalvik.vm.dex2oat-flags` 的输出；若使用自定义 ROM，也请说明。我有时间会研究的。
 
 </details>
 
